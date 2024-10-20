@@ -1,0 +1,52 @@
+@import "primeicons/primeicons.css";
+@import "../public/themes/mytheme/theme.scss";
+@import "@fontsource/nunito";
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background-image: url('../public/4_vshg_logo_final_graphic_large.png');
+    background-size:cover;
+    opacity:0.5;
+}
+body{
+    margin: 0 2rem 0 2rem;
+}
+.primary-header {
+    & .p-panel-header{
+        background-color: #001A36 !important;
+        color:white
+    }
+    & .p-panel-header-icon{
+        color:white
+    }
+}
+
+.secondary-header {
+    &-no-padding .p-panel-header{
+        padding-top:1px;
+        padding-bottom:1px;
+        background-color: #{$secondaryButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header{
+        background-color:#{$secondaryButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header-icon{
+        color:white
+    }
+}
+.p-float-label textarea ~ label {
+    top: -0.75rem;
+    font-size: 12px;
+}
+.tri{
+    & timesicon{
+        background-color: red!important;
+    }
+    & checkicon{
+        background-color: green!important;
+    }
+}

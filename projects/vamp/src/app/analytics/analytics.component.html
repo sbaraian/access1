@@ -1,0 +1,176 @@
+<div [formGroup]="fg">
+    <p-panel [toggleable]="true" styleClass="primary-header">
+        <ng-template pTemplate="header">
+            <div>Product Analog</div>
+        </ng-template>
+        <div class="mt-2 flex flex-row flex-wrap justify-content-between" *ngIf="!!analyticSetups">
+            <div class="flex justify-content-start flex-wrap gap-2">
+                <div>
+                    <p-floatLabel>
+                        <p-dropdown formControlName="brandNameCtrl" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                        <label for="float-label">Brand Name</label>
+                    </p-floatLabel>
+                </div>
+                <div>
+                    <p-floatLabel>
+                        <p-dropdown formControlName="genericNameCtrl" [options]="analyticSetups['GenericNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                        <label for="float-label">Generic Name</label>
+                    </p-floatLabel>
+                </div>
+                <div>
+                    <p-floatLabel>
+                        <p-dropdown formControlName="manufacturerCtrl" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                        <label for="float-label">Manufacturer</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+            <div class="flex justify-content-end flex-wrap gap-2">
+                <div>
+                    <p-buttonGroup class="gap-1">
+                        <p-button label="Generate" icon="pi pi-objects-column" class="mr-1" [raised]="true" [text]="true" (click)="generate()" />
+                        <p-button label="Export" icon="pi pi-file-excel" class="mr-1" [raised]="true" [text]="true" (click)="excel()" />
+                    </p-buttonGroup>
+                </div>
+            </div>
+        </div>
+    </p-panel>
+    <p-panel styleClass="secondary-header-no-padding" *ngIf="data.length > 0">
+        <ng-template pTemplate="header">
+            <div class="flex flex-row flex-wrap justify-content-between w-full">
+                <div class="flex align-items-center justify-content-start">
+                    Product<span *ngIf="data.length > 0">&nbsp;{{ productIndex + 1 }} of {{ data.length }}</span>
+                </div>
+                <div class="flex align-items-center justify-content-end h-full">
+                    <div>
+                        <p-paginator (onPageChange)="onProductPageChange($event)" [first]="0" [rows]="1" [totalRecords]="data.length"> </p-paginator>
+                    </div>
+                    <div>
+                        <p-buttonGroup>
+                            <p-button icon="pi pi-plus" severity="secondary" title="Add New" />
+                            <p-button icon="pi pi-save" severity="secondary" title="Save" />
+                            <p-button icon="pi pi-trash" severity="secondary" title="Delete" />
+                            <p-button icon="pi pi-print" severity="secondary" title="Print" />
+                        </p-buttonGroup>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <div *ngIf="productIndex >= 0" class="flex flex-column flex-nowrap">
+            <div class="mt-2 grid">
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-dropdown [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="true" formControlName="pBrandNameCtrl" />
+                        <label for="float-label">Brand Name</label>
+                    </p-floatLabel>
+                </div>
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-dropdown [options]="analyticSetups['GenericNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="true" formControlName="pGenericNameCtrl" />
+                        <label for="float-label">Generic Name</label>
+                    </p-floatLabel>
+                </div>
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-dropdown [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="true" formControlName="pManufacturerCtrl" />
+                        <label for="float-label">Manufacturer Name</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+            <div class="mt-2 grid">
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-calendar formControlName="pDateOfEntryIntoMarketCtrl" inputId="date_of_entry" [style]="{ 'min-width': '200px' }" />
+                        <label for="date_of_entry">Date of Entry into Market</label>
+                    </p-floatLabel>
+                </div>
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-calendar formControlName="pFdaApprovalCtrl" inputId="fda_approval" [style]="{ 'min-width': '200px' }" />
+                        <label for="fda_approval">FDA Approval</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+            <div class="mt-2 grid">
+                <div class="col-6">
+                    <p-floatLabel>
+                        <textarea formControlName="pMechanismOfActionCtrl" id="mechanism-of-action" rows="5" cols="30" pInputTextarea class="w-full"> </textarea>
+                        <label for="mechanism-of-action">Mechanism of Action</label>
+                    </p-floatLabel>
+                </div>
+                <div class="col-3">
+                    <p-floatLabel>
+                        <p-dropdown [options]="analyticSetups['ApprovalStatusId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" formControlName="pApprovalStatusCtrl" [showClear]="true" />
+                        <label for="float-label">Approval Status</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+            <div class="flex flex-row flex-wrap justify-content-left gap-7">
+                <div class="flex flex-column gap-2 text-center">
+                    <div>
+                        <label for="505b2">505b2</label>
+                    </div>
+                    <div>
+                        <p-triStateCheckbox inputId="505b2" formControlName="p505b2FlagCtrl" styleClass="tri" />
+                    </div>
+                </div>
+                <div class="flex flex-column gap-2 text-center">
+                    <div><label for="biosimilar">Biosimilar</label></div>
+                    <div><p-triStateCheckbox #pBiosimilarFlagCtrl inputId="biosimilar" formControlName="pBiosimilarFlagCtrl" styleClass="tri" /></div>
+                </div>
+                <div class="flex flex-column gap-2 text-center">
+                    <div><label for="blackBoxWarning">Black Box Warning</label></div>
+                    <div><p-triStateCheckbox inputId="blackBoxWarning" formControlName="pBlackBoxWarningFlagCtrl" styleClass="tri" /></div>
+                </div>
+                <div class="flex flex-column gap-2 text-center">
+                    <div><label for="additionalManufacturers">Additional Manufacturer products in same TA</label></div>
+                    <div><p-triStateCheckbox inputId="additionalManufacturers" formControlName="pAdditionalManufacturerFlagCtrl" styleClass="tri" /></div>
+                    <div>
+                        <p-multiSelect inputId="float-label" formControlName="pAdditionalManufacturerCtrl" [options]="analyticSetups['AdditionalManufacturersInSameTA']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                        <p-button icon="pi pi-plus" title="Add New" severity="secondary" />
+                    </div>
+                </div>
+                <div class="flex flex-column gap-2 text-center">
+                    <div><label for="firstInClass">First In Class</label></div>
+                    <div><p-triStateCheckbox inputId="firstInClass" formControlName="pFirstInClassFlagCtrl" styleClass="tri" /></div>
+                </div>
+                <div>
+                    <p-floatLabel>
+                        <p-dropdown [options]="analyticSetups['ComplexityOfTherapyId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" formControlName="pComplexityOfTherapyCtrl" [showClear]="true" />
+                        <label for="float-label">Complexity of Therapy</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+        </div>
+    </p-panel>
+    <p-panel styleClass="secondary-header-no-padding" *ngIf="productIndex >= 0 && !!data[productIndex].analyticIndications?.length">
+        <ng-template pTemplate="header">
+            <div class="flex flex-row flex-wrap justify-content-between w-full">
+                <div class="flex align-items-center justify-content-start">
+                    Indication<span *ngIf="data.length > 0">&nbsp;{{ indicationIndex + 1 }} of {{ data[productIndex].analyticIndications.length }}</span>
+                </div>
+                <div class="flex align-items-center justify-content-end h-full">
+                    <div>
+                        <p-paginator (onPageChange)="onIndicationPageChange($event)" [first]="0" [rows]="1" [totalRecords]="data[productIndex].analyticIndications.length"> </p-paginator>
+                    </div>
+                    <div>
+                        <p-buttonGroup>
+                            <p-button icon="pi pi-plus" severity="secondary" title="Add New" />
+                            <p-button icon="pi pi-save" severity="secondary" title="Save" />
+                            <p-button icon="pi pi-trash" severity="secondary" title="Delete" />
+                            <p-button icon="pi pi-print" severity="secondary" title="Print" />
+                        </p-buttonGroup>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+        <p-tabView>
+            <p-tabPanel>
+                <ng-template pTemplate="header"> </ng-template>
+                <p-floatLabel>
+                    <textarea formControlName="pMechanismOfActionCtrl" id="mechanism-of-action" rows="5" cols="30" pInputTextarea class="w-full"> </textarea>
+                    <label for="mechanism-of-action">Mechanism of Action</label>
+                </p-floatLabel>
+            </p-tabPanel>
+        </p-tabView>
+    </p-panel>
+</div>
