@@ -2,6 +2,7 @@
 <p-menubar [model]="items">
     <ng-template pTemplate="start">
         <img src="1_vshg_logo_final_primary_small.png" style="height: 50px" />
+        <!-- <img src="app/assets/vamp/browser/1_vshg_logo_final_primary_small.png" style="height: 50px" /> -->
     </ng-template>
     <ng-template pTemplate="item" let-item>
         <ng-container *ngIf="item.route; else urlRef">

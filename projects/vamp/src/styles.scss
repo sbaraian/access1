@@ -24,13 +24,15 @@ body{
 }
 
 .secondary-header {
-    &-no-padding .p-panel-header{
+    &-no-padding .p-panel-header,
+    &-no-padding .p-panel-footer{
         padding-top:1px;
         padding-bottom:1px;
         background-color: #{$secondaryButtonBg} !important;
         color:white
     }
-    & .p-panel-header{
+    & .p-panel-header,
+    & .p-panel-footer{
         background-color:#{$secondaryButtonBg} !important;
         color:white
     }
@@ -38,9 +40,36 @@ body{
         color:white
     }
 }
-.p-float-label textarea ~ label {
-    top: -0.75rem;
-    font-size: 12px;
+
+.third-header {
+    &-no-padding .p-panel-header{
+        padding-top:1px;
+        padding-bottom:1px;
+        background-color: #{$successButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header{
+        background-color:#{$successButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header-icon{
+        color:white
+    }
+}
+.fourth-header {
+    &-no-padding .p-panel-header{
+        padding-top:1px;
+        padding-bottom:1px;
+        background-color: #{$infoButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header{
+        background-color:#{$infoButtonBg} !important;
+        color:white
+    }
+    & .p-panel-header-icon{
+        color:white
+    }
 }
 .tri{
     & timesicon{
@@ -50,3 +79,95 @@ body{
         background-color: green!important;
     }
 }
+.p-tabview-nav-content .p-highlight .p-checkbox .p-checkbox-box{
+    border-color: inherit!important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* TITLE BARS */
+/* Dark Blue bar */
+.title-bar-dark{
+	background:#001A36;
+	color: #FFF;
+}
+/* Dark Teal Bar */
+.title-bar-level2{
+	background:#00718c;
+	color: #FFF;
+}
+/* Light Teal Bar */
+.title-bar-level3{
+	background:#00BCDD;
+	color: #001A36;
+}
+/* Brown/Grey Bar */
+.title-bar-level4{
+	background:#B6AFA7;
+	color: #000;
+}
+/* Light brown grey */
+.light-brown-grey{
+	background: #EDE9E4;
+	color: #000;
+}
+
+/* BUTTONS / Links that look like Buttons */
+.button-light-teal{
+	background:#00bcdd;
+	color: #001A36;
+	border: solid 2px #001A36;
+}
+
+.button-dark-teal{
+	background:#00718c;
+	color: #FFF;
+	border: solid 2px #FFF;
+}
+
+.button-light-teal:hover, .button-light-teal:focus,.button-dark-teal:hover, .button-dark-teal:focus {
+	background:#001A36;
+	color: #00bcdd;
+	border: solid 2px #001A36;
+	outline-offset: 2px;
+}
+.button-delete{
+	background: #EE0000;
+	color:#FFF;
+}
+.button-delete:hover, .button-delete:focus{
+	background: #8D2435;
+	color:#FFF;
+}
+/* FORM FIELDS */
+input[type=date], input[type=datetime], input[type=email], input[type=number], input[type=password], input[type=search], input[type=tel], input[type=text], input[type=time], input[type=url], input[type=week], select, textarea{
+	 border: 1px solid #666;
+	 color: #000;
+ }
+ ::placeholder{
+	 color:#666;
+	 opacity: 1;
+ }
+ 

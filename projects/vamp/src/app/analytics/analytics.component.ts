@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, DestroyRef, OnDestroy, OnInit, inject } from "@angular/core";
+import { Component, DestroyRef, inject, OnDestroy, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { DateTime } from "luxon";
@@ -7,56 +7,80 @@ import { MessageService } from "primeng/api";
 import { ButtonModule } from "primeng/button";
 import { ButtonGroupModule } from "primeng/buttongroup";
 import { CalendarModule } from "primeng/calendar";
+import { CheckboxModule } from "primeng/checkbox";
 import { DropdownModule } from "primeng/dropdown";
 import { FloatLabelModule } from "primeng/floatlabel";
+import { InputGroupModule } from "primeng/inputgroup";
+import { InputGroupAddonModule } from "primeng/inputgroupaddon";
+import { InputNumberModule } from "primeng/inputnumber";
+import { InputTextModule } from "primeng/inputtext";
+import { InputTextareaModule } from "primeng/inputtextarea";
 import { MultiSelectModule } from "primeng/multiselect";
 import { PaginatorModule, PaginatorState } from "primeng/paginator";
 import { PanelModule } from "primeng/panel";
 import { RippleModule } from "primeng/ripple";
+import { TableModule } from "primeng/table";
 import { TabViewModule } from "primeng/tabview";
 import { TriStateCheckboxModule } from "primeng/tristatecheckbox";
 
 import { BehaviorSubject } from "rxjs";
 import { tap } from "rxjs/operators";
 
-import { AnalyticProduct, AnalyticSetup, AnalyticSetups } from "./analytic-setup";
+import { AnalyticIndication, AnalyticIndicationCompetition, AnalyticProduct, AnalyticSetups } from "./analytic-setup";
 import { AnalyticsService } from "./analytics.service";
 
 @Component({
     selector: "app-analytics",
     standalone: true,
-    imports: [CommonModule, FloatLabelModule, PanelModule, DropdownModule, ReactiveFormsModule, ButtonModule, ButtonGroupModule, RippleModule, PaginatorModule, CalendarModule, TriStateCheckboxModule, MultiSelectModule, TabViewModule],
+    imports: [
+        CommonModule,
+        FloatLabelModule,
+        PanelModule,
+        DropdownModule,
+        ReactiveFormsModule,
+        ButtonModule,
+        ButtonGroupModule,
+        RippleModule,
+        PaginatorModule,
+        CalendarModule,
+        TriStateCheckboxModule,
+        MultiSelectModule,
+        TabViewModule,
+        CheckboxModule,
+        InputGroupModule,
+        InputGroupAddonModule,
+        InputTextModule,
+        InputTextareaModule,
+        TableModule,
+        InputNumberModule,
+    ],
     templateUrl: "./analytics.component.html",
     styleUrl: "./analytics.component.scss",
 })
 export class AnalyticsComponent implements OnInit, OnDestroy {
     analyticSetups!: AnalyticSetups;
     today = DateTime.now();
-    productIndex$ = new BehaviorSubject<number>(-1);
+    analyticIndex$ = new BehaviorSubject<number>(-1);
     indicationIndex$ = new BehaviorSubject<number>(-1);
-    productIndex = -1;
+    analyticIndex = -1;
     indicationIndex = -1;
-    data: AnalyticProduct[] = [];
+    analytics: AnalyticProduct[] = [];
     fg = new FormGroup({
         brandNameCtrl: new FormControl<number>(0, Validators.required),
         genericNameCtrl: new FormControl<number>(0, Validators.required),
         manufacturerCtrl: new FormControl<number>(0, Validators.required),
-        pBrandNameCtrl: new FormControl<number>(0, Validators.required),
-        pGenericNameCtrl: new FormControl<number>(0, Validators.required),
-        pManufacturerCtrl: new FormControl<number>(0, Validators.required),
-        pDateOfEntryIntoMarketCtrl: new FormControl<DateTime>(this.today, Validators.required),
-        pFdaApprovalCtrl: new FormControl<DateTime>(this.today, Validators.required),
-        pMechanismOfActionCtrl: new FormControl<string | null>(null),
-        pApprovalStatusCtrl: new FormControl<number | null>(null),
-        pComplexityOfTherapyCtrl: new FormControl<number | null>(null),
-        p505b2FlagCtrl: new FormControl<boolean | null>(null),
-        pBiosimilarFlagCtrl: new FormControl<boolean | null>(null),
-        pBlackBoxWarningFlagCtrl: new FormControl<boolean | null>(null),
-        pAdditionalManufacturerFlagCtrl: new FormControl<boolean | null>(null),
-        pAdditionalManufacturerCtrl: new FormControl<number[] | null>(null),
-        pFirstInClassFlagCtrl: new FormControl<boolean | null>(null),
     });
+    dosingItems = [
+        { field: "isDosingPo", title: "PO", noteField: "dosingPo" },
+        { field: "isDosingSqSelf", title: "SQ Self Admin", noteField: "dosingSqSelf" },
+        { field: "isDosingSqHp", title: "SQ HP Admin", noteField: "dosingSqHp" },
+        { field: "isDosingImSelf", title: "IM Self Admin", noteField: "dosingImSelf" },
+        { field: "isDosingImHp", title: "IM HP Admin", noteField: "dosingImHp" },
+        { field: "isDosingIv", title: "IV", noteField: "dosingIv" },
+    ];
     private destroyRef = inject(DestroyRef);
+    paginatorFirstProduct = 0;
+    paginatorFirstIndication = 0;
 
     constructor(
         private analyticsService: AnalyticsService,
@@ -70,7 +94,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
                 tap((data: any) => {
                     const keys = ["BrandNameId", "GenericNameId", "ManufacturerId"];
                     for (var i = 0; i < keys.length; i++) {
-                        data[keys[i]].splice(0, 1, { name: "all", analyticSetupId: 0 });
+                        data[`${keys[i]}WithAll`] = [{ name: "all", analyticSetupId: 0 }, ...data[keys[i]]];
                     }
                     this.analyticSetups = data;
                 }),
@@ -78,25 +102,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
             )
             .subscribe();
 
-        this.productIndex$
+        this.analyticIndex$
             .pipe(
-                tap((productIndex) => {
-                    this.productIndex = productIndex;
+                tap((analyticIndex) => {
+                    this.analyticIndex = analyticIndex;
                     this.indicationIndex$.next(-1);
-                    if (productIndex >= 0 && productIndex < this.data.length) {
-                        this.fg.get("pBrandNameCtrl")?.setValue(this.data[productIndex].brandName.analyticSetupId);
-                        this.fg.get("pGenericNameCtrl")?.setValue(this.data[productIndex].genericName.analyticSetupId);
-                        this.fg.get("pManufacturerCtrl")?.setValue(this.data[productIndex].manufacturer.analyticSetupId);
-                        this.fg.get("pApprovalStatusCtrl")?.setValue(this.data[productIndex].approvalStatusId);
-                        this.fg.get("pMechanismOfActionCtrl")?.setValue(this.data[productIndex].mechanismOfAction);
-                        this.fg.get("pComplexityOfTherapyCtrl")?.setValue(this.data[productIndex].complexityOfTherapyId);
-                        this.fg.get("p505b2FlagCtrl")?.setValue(this.data[productIndex].is505B2);
-                        this.fg.get("pBiosimilarFlagCtrl")?.setValue(this.data[productIndex].isBiosimilar);
-                        this.fg.get("pBlackBoxWarningFlagCtrl")?.setValue(this.data[productIndex].isBlackBoxWarning);
-                        this.fg.get("pAdditionalManufacturerFlagCtrl")?.setValue(this.data[productIndex].isAdditionalManufacturerProductsInSameTa);
-                        this.fg.get("pFirstInClassFlagCtrl")?.setValue(this.data[productIndex].isFirstInClass);
-                        this.fg.get("pAdditionalManufacturerCtrl")?.setValue(this.data[productIndex].additionalManufacturerProductsInSameTas?.map((item: AnalyticSetup) => item.analyticSetupId));
-                        if (this.data[productIndex].analyticIndications?.length > 0) {
+                    if (analyticIndex >= 0 && analyticIndex < this.analytics.length) {
+                        if (this.analytics[analyticIndex].analyticIndications?.length > 0) {
                             this.indicationIndex$.next(0);
                         }
                     }
@@ -109,23 +121,135 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
             .pipe(
                 tap((indicationIndex) => {
                     this.indicationIndex = indicationIndex;
-                    if (indicationIndex >= 0 && indicationIndex < this.data[this.productIndex].analyticIndications.length) {
+                    if (indicationIndex >= 0 && indicationIndex < this.analytics[this.analyticIndex].analyticIndications.length) {
                     }
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
+    addAnalytic = (): void => {
+        this.analytics.push({ analyticIndications: [], additionalManufacturerProductsInSameTas: [], brandName: {}, genericName: {}, manufacturer: {} });
+        this.analyticIndex$.next(this.analytics.length - 1);
+        this.paginatorFirstProduct = this.analytics.length - 1;
+    };
+    addAnalyticIndication = (): void => {
+        if (this.analyticIndex >= 0) {
+            this.analytics[this.analyticIndex].analyticIndications.push({ analyticIndicationCompetitions: [], analyticIndicationDetails: [], details: {} });
+            this.indicationIndex$.next(this.analytics[this.analyticIndex].analyticIndications.length - 1);
+            this.paginatorFirstIndication = this.analytics[this.analyticIndex].analyticIndications.length - 1;
+        }
+    };
+    deleteAnalytic = (): void => {
+        if (this.analyticIndex >= 0 && this.analyticIndex < this.analytics.length) {
+            this.analytics.splice(this.analyticIndex, 1);
+            if (this.analyticIndex > 0) {
+                this.analyticIndex--;
+            }
+            this.paginatorFirstProduct = this.analyticIndex;
+        }
+    };
+    deleteAnalyticIndication = (): void => {
+        if (this.indicationIndex >= 0 && this.indicationIndex < this.analytics[this.analyticIndex].analyticIndications.length) {
+            this.analytics[this.analyticIndex].analyticIndications.splice(this.indicationIndex, 1);
+            if (this.indicationIndex > 0) {
+                this.indicationIndex--;
+            }
+            this.paginatorFirstIndication = this.indicationIndex;
+        }
+    };
     ngOnDestroy() {}
+    isValid = (): boolean => {
+        if (this.analyticIndex < 0) {
+            this.logError("Please select a product.");
+            return false;
+        }
+        if (!this.analytics[this.analyticIndex].analyticId) {
+            if (!this.analytics[this.analyticIndex].brandName.analyticSetupId) {
+                this.logError("Please enter a Brand Name.");
+                return false;
+            }
+            if (!this.analytics[this.analyticIndex].genericName.analyticSetupId) {
+                this.logError("Please enter a Generic Name.");
+                return false;
+            }
+            if (!this.analytics[this.analyticIndex].manufacturer.analyticSetupId) {
+                this.logError("Please enter a Manufacturer.");
+                return false;
+            }
+        }
+        if (this.analytics[this.analyticIndex].isAdditionalManufacturerProductsInSameTa && !this.analytics[this.analyticIndex].additionalManufacturerProductsInSameTas?.length) {
+            this.logError("Please enter Additional Manufacturer Products in Same TA.");
+            return false;
+        }
+        if (!this.analytics[this.analyticIndex].complexityOfTherapyId) {
+            this.logError("Please enter a Complexity Of Therapy.");
+            return false;
+        }
+        if (this.analytics[this.analyticIndex].analyticIndications.length > 0) {
+            if (
+                this.analytics[this.analyticIndex].analyticIndications.some((element: AnalyticIndication, idx) => {
+                    if (!element.details["Age"]?.length) {
+                        this.logError(`Please enter Age for Indication ${idx + 1}.`);
+                        return true;
+                    }
+                    if (!element.usageId) {
+                        this.logError(`Please enter Usage for Indication ${idx + 1}.`);
+                        return true;
+                    }
+                    if (!element.patientPopulationSizeId) {
+                        this.logError(`Please enter Patient Population Size for Indication ${idx + 1}.`);
+                        return true;
+                    }
+                    if (!element.lineOfTherapyId) {
+                        this.logError(`Please enter Line of Therapy for Indication ${idx + 1}.`);
+                        return true;
+                    }
+                    if (!element.treatmentTypeId) {
+                        this.logError(`Please enter Line of Treatment Type for Indication ${idx + 1}.`);
+                        return true;
+                    }
+                    if (element.analyticIndicationCompetitions.length > 0) {
+                        if (
+                            element.analyticIndicationCompetitions.some((el: AnalyticIndicationCompetition, idx2: number) => {
+                                if (!el.competitorProduct || el.competitorProduct.analyticSetupId === -1) {
+                                    this.logError(`Please enter Product for Indication ${idx + 1}, Competition ${idx2 + 1}.`);
+                                    return true;
+                                }
+                                if (!el.competitorManufacturer || el.competitorManufacturer.analyticSetupId === -1) {
+                                    this.logError(`Please enter Manufacturer for Indication ${idx + 1}, Competition ${idx2 + 1}.`);
+                                    return true;
+                                }
+                                return false;
+                            })
+                        ) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+            ) {
+                return false;
+            }
+        }
+        return true;
+    };
+    logError = (message: string): void => {
+        this.messageService.add({ severity: "error", detail: message });
+    };
+    save = () => {
+        if (this.isValid()) {
+        }
+    };
     generate = (): void => {
-        this.productIndex$.next(-1);
+        this.analyticIndex$.next(-1);
         this.indicationIndex$.next(-1);
         this.analyticsService
             .getData(this.fg.get("brandNameCtrl")!.value!, this.fg.get("genericNameCtrl")!.value!, this.fg.get("manufacturerCtrl")!.value!)
             .pipe(
                 tap((data) => {
-                    this.data = data;
-                    this.productIndex$.next(this.data.length > 0 ? 0 : -1);
+                    this.analytics = data;
+                    this.analyticIndex$.next(this.analytics.length > 0 ? 0 : -1);
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
@@ -136,7 +260,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
         console.log(222);
     };
     onProductPageChange = (event: PaginatorState) => {
-        this.productIndex$.next(event.first!);
+        this.analyticIndex$.next(event.first!);
     };
     onIndicationPageChange = (event: PaginatorState) => {
         this.indicationIndex$.next(event.first!);
