@@ -1,18 +1,16 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { Observable } from "rxjs";
-import { map, tap } from "rxjs/operators";
-import { AnalyticSetupResponse, AnalyticSetups } from "./analytic-setup";
+import { map } from "rxjs/operators";
+import { AnalyticProduct, AnalyticSetupResponse, AnalyticSetups } from "./analytic-setup";
 import { AnalyticsSerializer } from "./analytics-serializer";
 @Injectable({
     providedIn: "root",
 })
 export class AnalyticsService {
     private serviceUrl = "api/analytics";
-    constructor(
-        private http: HttpClient,
-        private analyticsSerializer: AnalyticsSerializer,
-    ) {}
+    private http = inject(HttpClient);
+    private analyticsSerializer = inject(AnalyticsSerializer);
 
     getSetupNames = (): Observable<AnalyticSetups> => {
         const url = `${this.serviceUrl}/getSetupNames`;
@@ -29,11 +27,22 @@ export class AnalyticsService {
         );
     };
 
-    getData = (brandNameId: number, genericNameId?: number, manufacturerId?: number): Observable<any> => {
+    deleteAnalytic = (id: number): Observable<any> => {
+        const url = `${this.serviceUrl}/delete/${id}`;
+        return this.http.delete<any[]>(url);
+    };
+
+    getData = (brandNameId: number, genericNameId?: number, manufacturerId?: number): Observable<AnalyticProduct[]> => {
         const url = `${this.serviceUrl}/getData?brandNameId=${brandNameId}&genericNameId=${genericNameId}&manufacturerId=${manufacturerId}`;
-        return this.http.get<AnalyticSetupResponse[]>(url).pipe(
-            map((data) => this.analyticsSerializer.fromJsonArray(data)),
-            tap(console.log),
-        );
+        return this.http.get<AnalyticSetupResponse[]>(url).pipe(map((data) => this.analyticsSerializer.fromJsonArray(data)));
+    };
+
+    save = (analytic: AnalyticProduct): Observable<AnalyticProduct | null> => {
+        if (!analytic.analyticId) {
+            const url = `${this.serviceUrl}/save`;
+            return this.http.post<AnalyticProduct>(url, analytic);
+        }
+        const url = `${this.serviceUrl}/update/${analytic.analyticId}`;
+        return this.http.put<AnalyticProduct>(url, analytic);
     };
 }

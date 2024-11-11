@@ -1,13 +1,16 @@
 import { CommonModule } from "@angular/common";
-import { Component, DestroyRef, inject, OnDestroy, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import { DateTime } from "luxon";
-import { MessageService } from "primeng/api";
+import { ConfirmationService, MessageService } from "primeng/api";
 import { ButtonModule } from "primeng/button";
 import { ButtonGroupModule } from "primeng/buttongroup";
 import { CalendarModule } from "primeng/calendar";
 import { CheckboxModule } from "primeng/checkbox";
+import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from "primeng/dropdown";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { InputGroupModule } from "primeng/inputgroup";
@@ -21,12 +24,14 @@ import { PanelModule } from "primeng/panel";
 import { RippleModule } from "primeng/ripple";
 import { TableModule } from "primeng/table";
 import { TabViewModule } from "primeng/tabview";
+import { ToastModule } from "primeng/toast";
 import { TriStateCheckboxModule } from "primeng/tristatecheckbox";
+import { BehaviorSubject, EMPTY } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
 
-import { BehaviorSubject } from "rxjs";
-import { tap } from "rxjs/operators";
-
-import { AnalyticIndication, AnalyticIndicationCompetition, AnalyticProduct, AnalyticSetups } from "./analytic-setup";
+import { AuthService } from "../auth/auth.service";
+import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
+import { AnalyticIndication, AnalyticIndicationCompetition, AnalyticProduct, AnalyticSetup, AnalyticSetups } from "./analytic-setup";
 import { AnalyticsService } from "./analytics.service";
 
 @Component({
@@ -53,18 +58,24 @@ import { AnalyticsService } from "./analytics.service";
         InputTextareaModule,
         TableModule,
         InputNumberModule,
+        ToastModule,
+        DialogModule,
+        ConfirmDialogHeadless,
     ],
+    providers: [MessageService, ConfirmationService, AuthService],
     templateUrl: "./analytics.component.html",
     styleUrl: "./analytics.component.scss",
 })
-export class AnalyticsComponent implements OnInit, OnDestroy {
+export class AnalyticsComponent implements OnInit {
     analyticSetups!: AnalyticSetups;
     today = DateTime.now();
     analyticIndex$ = new BehaviorSubject<number>(-1);
     indicationIndex$ = new BehaviorSubject<number>(-1);
     analyticIndex = -1;
     indicationIndex = -1;
+    competitionIndex = -1;
     analytics: AnalyticProduct[] = [];
+    newItemCtrl = new FormControl<string>("");
     fg = new FormGroup({
         brandNameCtrl: new FormControl<number>(0, Validators.required),
         genericNameCtrl: new FormControl<number>(0, Validators.required),
@@ -79,15 +90,23 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
         { field: "isDosingIv", title: "IV", noteField: "dosingIv" },
     ];
     private destroyRef = inject(DestroyRef);
+    private confirmationService = inject(ConfirmationService);
+    private analyticsService = inject(AnalyticsService);
+    private messageService = inject(MessageService);
+    public authService = inject(AuthService);
+
     paginatorFirstProduct = 0;
     paginatorFirstIndication = 0;
-
-    constructor(
-        private analyticsService: AnalyticsService,
-        private messageService: MessageService,
-    ) {}
-
-    ngOnInit() {
+    acceptLabel = "Delete";
+    rejectLabel = "Cancel";
+    confirmValue = 0;
+    isNewVisible = false;
+    headerNew = "";
+    newItemType = 0;
+    isReadWrite = false;
+    isPdf = true;
+    showPdf = false;
+    getSetupNames = () => {
         this.analyticsService
             .getSetupNames()
             .pipe(
@@ -101,11 +120,16 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
+    };
+    ngOnInit() {
+        this.getSetupNames();
 
+        this.isReadWrite = !!this.authService.currentUserValue?.isReadWrite;
         this.analyticIndex$
             .pipe(
                 tap((analyticIndex) => {
                     this.analyticIndex = analyticIndex;
+                    this.paginatorFirstProduct = analyticIndex;
                     this.indicationIndex$.next(-1);
                     if (analyticIndex >= 0 && analyticIndex < this.analytics.length) {
                         if (this.analytics[analyticIndex].analyticIndications?.length > 0) {
@@ -121,15 +145,111 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
             .pipe(
                 tap((indicationIndex) => {
                     this.indicationIndex = indicationIndex;
-                    if (indicationIndex >= 0 && indicationIndex < this.analytics[this.analyticIndex].analyticIndications.length) {
-                    }
+                    this.paginatorFirstIndication = indicationIndex;
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
     }
+
+    showDialog = (newItemType: number, idx?: number) => {
+        this.newItemType = newItemType;
+        let item: AnalyticSetup | null = null;
+        let itemLabel = "";
+        this.competitionIndex = idx ?? -1;
+        switch (newItemType) {
+            case 1:
+            case 4:
+                this.headerNew = "New Brand Name";
+                itemLabel = "BrandNameId";
+                break;
+            case 2:
+                this.headerNew = "New Generic Name";
+                itemLabel = "GenericNameId";
+                break;
+            case 3:
+            case 5:
+                this.headerNew = "New Manufacturer";
+                itemLabel = "ManufacturerId";
+                break;
+            case 6:
+                this.headerNew = "New Additional Manufacturer products in same TA";
+                itemLabel = "AdditionalManufacturersInSameTA";
+                break;
+        }
+
+        this.newItemCtrl.setValue("");
+        this.isNewVisible = true;
+    };
+
+    saveNew = () => {
+        if (this.newItemCtrl.value?.trim().length === 0) {
+            this.messageService.add({ severity: "error", summary: "Error", detail: "Please enter a value", life: 3000 });
+            return;
+        }
+        let itemLabel = "";
+        let ctrl: AnalyticSetup;
+        switch (this.newItemType) {
+            case 1:
+                itemLabel = "BrandNameId";
+                this.analytics[this.analyticIndex].brandName.analyticSetupId = 0;
+                break;
+            case 2:
+                itemLabel = "GenericNameId";
+                this.analytics[this.analyticIndex].genericName.analyticSetupId = 0;
+                break;
+            case 3:
+                itemLabel = "ManufacturerId";
+                this.analytics[this.analyticIndex].manufacturer.analyticSetupId = 0;
+                break;
+            case 4:
+                itemLabel = "BrandNameId";
+                this.analytics[this.analyticIndex]!.analyticIndications[this.indicationIndex].analyticIndicationCompetitions[this.competitionIndex].competitorProduct!.analyticSetupId = 0;
+                break;
+            case 5:
+                itemLabel = "ManufacturerId";
+                this.analytics[this.analyticIndex].analyticIndications[this.indicationIndex].analyticIndicationCompetitions[this.competitionIndex].competitorManufacturer!.analyticSetupId = 0;
+                break;
+            case 6:
+                itemLabel = "AdditionalManufacturersInSameTA";
+                break;
+        }
+        let minAnalyticSetupId = Math.min(...this.analyticSetups[itemLabel].map((item) => item.analyticSetupId!));
+        if (minAnalyticSetupId > 0) {
+            minAnalyticSetupId = -1;
+        } else {
+            minAnalyticSetupId--;
+        }
+
+        const item = <AnalyticSetup>{ analyticSetupId: minAnalyticSetupId, name: this.newItemCtrl.value };
+        this.analyticSetups[itemLabel].push({ ...item });
+        setTimeout(() => {
+            switch (this.newItemType) {
+                case 1:
+                    this.analytics[this.analyticIndex].brandName = item;
+                    break;
+                case 2:
+                    this.analytics[this.analyticIndex].genericName = item;
+                    break;
+                case 3:
+                    this.analytics[this.analyticIndex].manufacturer = item;
+                    break;
+                case 4:
+                    this.analytics[this.analyticIndex].analyticIndications[this.indicationIndex].analyticIndicationCompetitions[this.competitionIndex].competitorProduct = item;
+                    break;
+                case 5:
+                    this.analytics[this.analyticIndex].analyticIndications[this.indicationIndex].analyticIndicationCompetitions[this.competitionIndex].competitorManufacturer = item;
+                    break;
+                case 6:
+                    this.analytics[this.analyticIndex].additionalManufacturerProductsInSameTas = [...this.analytics[this.analyticIndex].additionalManufacturerProductsInSameTas!, item];
+                    break;
+            }
+        }, 10);
+        this.isNewVisible = false;
+    };
+
     addAnalytic = (): void => {
-        this.analytics.push({ analyticIndications: [], additionalManufacturerProductsInSameTas: [], brandName: {}, genericName: {}, manufacturer: {} });
+        this.analytics.push({ analyticId: 0, analyticIndications: [], additionalManufacturerProductsInSameTas: [], brandName: {}, genericName: {}, manufacturer: {} });
         this.analyticIndex$.next(this.analytics.length - 1);
         this.paginatorFirstProduct = this.analytics.length - 1;
     };
@@ -142,13 +262,51 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     };
     deleteAnalytic = (): void => {
         if (this.analyticIndex >= 0 && this.analyticIndex < this.analytics.length) {
-            this.analytics.splice(this.analyticIndex, 1);
-            if (this.analyticIndex > 0) {
-                this.analyticIndex--;
+            const deleteItemFromArray = () => {
+                this.analytics.splice(this.analyticIndex, 1);
+                if (this.analyticIndex > 0) {
+                    this.analyticIndex--;
+                }
+                this.paginatorFirstProduct = this.analyticIndex;
+            };
+
+            if (!!this.analytics[this.analyticIndex].analyticId) {
+                this.confirmValue = 0;
+                this.confirmationService.confirm({
+                    header: "Are you sure?",
+                    message: "Please confirm to proceed.",
+                    accept: () => {
+                        this.analyticsService
+                            .deleteAnalytic(this.analytics[this.analyticIndex].analyticId!)
+                            .pipe(
+                                tap(() => {
+                                    deleteItemFromArray();
+                                    this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000 });
+                                }),
+                                catchError((err) => {
+                                    this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000 });
+                                    return EMPTY;
+                                }),
+                                takeUntilDestroyed(this.destroyRef),
+                            )
+                            .subscribe();
+                    },
+                });
+            } else {
+                deleteItemFromArray();
             }
-            this.paginatorFirstProduct = this.analyticIndex;
         }
     };
+
+    onHide(ev: number) {
+        if (ev === 0) {
+            switch (this.confirmValue) {
+                case 1:
+                    break;
+            }
+        }
+    }
+
     deleteAnalyticIndication = (): void => {
         if (this.indicationIndex >= 0 && this.indicationIndex < this.analytics[this.analyticIndex].analyticIndications.length) {
             this.analytics[this.analyticIndex].analyticIndications.splice(this.indicationIndex, 1);
@@ -158,7 +316,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
             this.paginatorFirstIndication = this.indicationIndex;
         }
     };
-    ngOnDestroy() {}
+
+    deleteCompetition = (idx: number): void => {
+        if (idx >= 0 && idx < this.analytics[this.analyticIndex].analyticIndications[this.indicationIndex].analyticIndicationCompetitions.length) {
+            this.analytics[this.analyticIndex].analyticIndications[this.indicationIndex].analyticIndicationCompetitions.splice(idx, 1);
+        }
+    };
+
     isValid = (): boolean => {
         if (this.analyticIndex < 0) {
             this.logError("Please select a product.");
@@ -212,11 +376,11 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
                     if (element.analyticIndicationCompetitions.length > 0) {
                         if (
                             element.analyticIndicationCompetitions.some((el: AnalyticIndicationCompetition, idx2: number) => {
-                                if (!el.competitorProduct || el.competitorProduct.analyticSetupId === -1) {
+                                if (!el.competitorProduct || !el.competitorProduct.analyticSetupId) {
                                     this.logError(`Please enter Product for Indication ${idx + 1}, Competition ${idx2 + 1}.`);
                                     return true;
                                 }
-                                if (!el.competitorManufacturer || el.competitorManufacturer.analyticSetupId === -1) {
+                                if (!el.competitorManufacturer || !el.competitorManufacturer.analyticSetupId) {
                                     this.logError(`Please enter Manufacturer for Indication ${idx + 1}, Competition ${idx2 + 1}.`);
                                     return true;
                                 }
@@ -237,13 +401,30 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     logError = (message: string): void => {
         this.messageService.add({ severity: "error", detail: message });
     };
+    getPayload = (data: AnalyticProduct): AnalyticProduct => ({
+        ...data,
+    });
     save = () => {
         if (this.isValid()) {
+            this.analyticsService
+                .save(this.getPayload(this.analytics[this.analyticIndex]))
+                .pipe(
+                    tap((data) => {
+                        if (!!data) {
+                            this.getSetupNames();
+                            this.analytics[this.analyticIndex] = data;
+                        }
+                        this.messageService.add({ severity: "success", detail: "Product saved." });
+                    }),
+                    takeUntilDestroyed(this.destroyRef),
+                )
+                .subscribe();
         }
     };
     generate = (): void => {
         this.analyticIndex$.next(-1);
         this.indicationIndex$.next(-1);
+        this.analytics = [];
         this.analyticsService
             .getData(this.fg.get("brandNameCtrl")!.value!, this.fg.get("genericNameCtrl")!.value!, this.fg.get("manufacturerCtrl")!.value!)
             .pipe(
@@ -255,10 +436,34 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
             )
             .subscribe();
     };
+    generatePdf = (): void => {
+        this.isPdf = false;
+        setTimeout(() => {
+            const data = document.getElementById("pdf-content");
+            if (data) {
+                html2canvas(data).then((canvas) => {
+                    const imgData = canvas.toDataURL("image/png");
+                    const pdf = new jsPDF({
+                        orientation: "portrait",
+                        unit: "in",
+                        format: [40, 25],
+                    });
+                    const imgProps = pdf.getImageProperties(imgData);
 
-    excel = (): void => {
-        console.log(222);
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const pdfWidth = (imgProps.width * pdfHeight) / imgProps.height;
+                    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+                    pdf.save("download.pdf");
+                    this.isPdf = true;
+                });
+            }
+        }, 1000);
     };
+
+    print = (): void => {
+        window.print();
+    };
+
     onProductPageChange = (event: PaginatorState) => {
         this.analyticIndex$.next(event.first!);
     };

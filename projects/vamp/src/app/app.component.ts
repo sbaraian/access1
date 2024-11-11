@@ -1,6 +1,8 @@
 import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router, RouterOutlet } from "@angular/router";
+import { NgHttpLoaderModule } from "ng-http-loader";
 import { MenuItem } from "primeng/api";
 import { AvatarModule } from "primeng/avatar";
 import { BadgeModule } from "primeng/badge";
@@ -8,22 +10,68 @@ import { ButtonModule } from "primeng/button";
 import { MenubarModule } from "primeng/menubar";
 import { RippleModule } from "primeng/ripple";
 import { ToastModule } from "primeng/toast";
+import { filter, switchMap, tap } from "rxjs/operators";
+import { AuthService } from "./auth/auth.service";
+import { BodyStyleService } from "./body-style.service";
 
 @Component({
     selector: "app-root",
     standalone: true,
-    imports: [RouterOutlet, MenubarModule, BadgeModule, AvatarModule, RippleModule, CommonModule, ButtonModule, ToastModule],
+    imports: [RouterOutlet, MenubarModule, BadgeModule, AvatarModule, RippleModule, CommonModule, ButtonModule, ToastModule, NgHttpLoaderModule],
+    providers: [AuthService],
     templateUrl: "./app.component.html",
     styleUrl: "./app.component.scss",
 })
 export class AppComponent implements OnInit {
     title = "vamp";
     items: MenuItem[] | undefined;
+    private router = inject(Router);
+    public authService = inject(AuthService);
+    private destroyRef = inject(DestroyRef);
+    private bodyStyleService = inject(BodyStyleService);
+    isAuthenticated = false;
 
-    constructor(private router: Router) {}
+    public currentUser$ = this.authService.currentUser$
+        .pipe(
+            tap((currentUser) => {
+                if (!currentUser) {
+                    this.isAuthenticated = false;
+                    this.bodyStyleService.removeClass("authorized");
+                    this.bodyStyleService.addClass("not-authorized");
+                } else {
+                    this.isAuthenticated = true;
+                    this.bodyStyleService.removeClass("not-authorized");
+                    this.bodyStyleService.addClass("authorized");
+                }
+            }),
+            takeUntilDestroyed(),
+        )
+        .subscribe();
+
+    logout = () => {
+        this.authService.logout().subscribe({
+            error: () => {
+                this.router.navigate(["/login"]);
+            },
+            complete: () => {
+                this.router.navigate(["/login"]);
+            },
+        });
+    };
+
     ngOnInit() {
+        this.authService
+            .isLogged()
+            .pipe(
+                filter((item) => !item),
+                switchMap(() => {
+                    return this.authService.logout();
+                }),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
         this.items = [
-            {
+            /*{
                 label: "Client Activity",
                 items: [
                     {
@@ -60,10 +108,21 @@ export class AppComponent implements OnInit {
             {
                 label: "Reports",
                 items: [],
-            },
+            },*/
             {
                 label: "Contracting",
-                items: [],
+                items: [
+                    {
+                        icon: "pi pi-file-plus",
+                        label: "Initiate New Contracts",
+                        route: "/contracts/0",
+                    },
+                    {
+                        icon: "pi pi-list",
+                        label: "Contract Management",
+                        route: "/contracts",
+                    },
+                ],
             },
             {
                 label: "Analytics",
@@ -74,10 +133,10 @@ export class AppComponent implements OnInit {
                         route: "/analytics",
                     },
                 ],
-            },
+            } /*
             {
                 label: "Administration",
-            },
+            },*/,
         ];
     }
 }

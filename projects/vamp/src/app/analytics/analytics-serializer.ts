@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AnalyticIndication, AnalyticIndicationCompetition, AnalyticProduct, AnalyticSetup } from "./analytic-setup";
+import { AnalyticIndication, AnalyticIndicationCompetition, AnalyticProduct } from "./analytic-setup";
 @Injectable({
     providedIn: "root",
 })
@@ -26,7 +26,7 @@ export class AnalyticsSerializer {
         isBlackBoxWarning: json.isBlackBoxWarning,
         isAdditionalManufacturerProductsInSameTa: json.isAdditionalManufacturerProductsInSameTa,
         additionalInformation: json.additionalInformation,
-        additionalManufacturerProductsInSameTas: json.additionalManufacturerProductsInSameTas.map((item: AnalyticSetup) => item.analyticSetupId),
+        additionalManufacturerProductsInSameTas: json.additionalManufacturerProductsInSameTas,
         analyticIndications: [
             ...json.analyticIndications.map((item: AnalyticIndication) => ({
                 ...item,

@@ -1,7 +1,7 @@
 @import "primeicons/primeicons.css";
 @import "../public/themes/mytheme/theme.scss";
 @import "@fontsource/nunito";
-body::before{
+body1::before{
     content:"";
     position:fixed;
     inset:0;
@@ -10,7 +10,26 @@ body::before{
     background-size:cover;
     opacity:0.5;
 }
-body{
+body1{
+    margin: 0 2rem 0 2rem;
+}
+body.not-authorized::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background-image: url('../public/viking_image.jpg');
+    background-size:cover;
+    margin: 0;
+}
+body.authorized::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    background-image: url('../public/4_vshg_logo_final_graphic_large.png');
+    background-size:cover;
+    opacity:0.5;
     margin: 0 2rem 0 2rem;
 }
 .primary-header {
@@ -170,4 +189,13 @@ input[type=date], input[type=datetime], input[type=email], input[type=number], i
 	 color:#666;
 	 opacity: 1;
  }
- 
+ @media print {
+	.no-print {
+		display: none;
+	}
+}
+@media screen {
+	.for-print {
+		display: none;
+	}
+}

@@ -1,0 +1,16 @@
+<div class="flex h-full h-auto align-items-center justify-content-center" style="min-height: 90vh">
+    <div class="flex flex-column gap-1 w-2" [formGroup]="fg">
+        <div>
+            <p-iconField iconPosition="left">
+                <p-inputIcon styleClass="pi pi-user" />
+                <input type="text" pInputText placeholder="Username" [formControl]="userCtrl" class="w-full" />
+            </p-iconField>
+        </div>
+        <div>
+            <p-password [toggleMask]="true" [feedback]="false" [formControl]="passwordCtrl" inputStyleClass="w-full" styleClass="w-full" />
+        </div>
+        <div>
+            <p-button label="login" [raised]="true" severity="secondary" styleClass="w-full" (click)="onSubmit()" />
+        </div>
+    </div>
+</div>

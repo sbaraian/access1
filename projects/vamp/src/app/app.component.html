@@ -1,8 +1,9 @@
 <p-toast position="bottom-right" />
-<p-menubar [model]="items">
+<ng-http-loader></ng-http-loader>
+<p-menubar [model]="items" *ngIf="isAuthenticated" class="no-print">
     <ng-template pTemplate="start">
-        <img src="1_vshg_logo_final_primary_small.png" style="height: 50px" />
-        <!-- <img src="app/assets/vamp/browser/1_vshg_logo_final_primary_small.png" style="height: 50px" /> -->
+        <!-- <img src="1_vshg_logo_final_primary_small.png" style="height: 50px" /> -->
+        <img src="app/assets/vamp/browser/1_vshg_logo_final_primary_small.png" style="height: 50px" />
     </ng-template>
     <ng-template pTemplate="item" let-item>
         <ng-container *ngIf="item.route; else urlRef">
@@ -28,7 +29,7 @@
     <ng-template pTemplate="end">
         <div class="flex align-items-center gap-2">
             <div>
-                <p-button label="logout" [link]="true" routerLink="/logout" />
+                <p-button label="logout" [link]="true" (click)="logout()" />
             </div>
             <div><span class="pi pi-phone"></span></div>
             <div>

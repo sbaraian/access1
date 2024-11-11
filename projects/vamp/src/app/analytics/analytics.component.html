@@ -1,7 +1,8 @@
-<div [formGroup]="fg">
+<p-toast position="bottom-right" />
+<div [formGroup]="fg" class="no-print">
     <p-panel [toggleable]="true" styleClass="primary-header">
         <ng-template pTemplate="header">
-            <div>Product Analog</div>
+            <div class="font-bold">Product Analog</div>
         </ng-template>
         <div class="mt-2 flex flex-row flex-wrap justify-content-between" *ngIf="!!analyticSetups">
             <div class="flex justify-content-start flex-wrap gap-2">
@@ -28,68 +29,106 @@
                 <div>
                     <p-buttonGroup class="gap-1">
                         <p-button label="Generate" icon="pi pi-objects-column" class="mr-1" [raised]="true" [text]="true" (click)="generate()" />
-                        <p-button label="Export" icon="pi pi-file-excel" class="mr-1" [raised]="true" [text]="true" (click)="excel()" />
+                        <p-button label="Export" icon="pi pi-file-export" class="mr-1" [raised]="true" [text]="true" (click)="showPdf = true" *ngIf="!!analytics.length" />
                     </p-buttonGroup>
                 </div>
             </div>
         </div>
     </p-panel>
 </div>
-<div>
-    <p-panel styleClass="secondary-header-no-padding" *ngIf="analytics.length > 0">
+<div class="no-print">
+    <p-panel styleClass="secondary-header">
         <ng-template pTemplate="header">
             <div class="flex flex-row flex-wrap justify-content-between w-full">
-                <div class="flex align-items-center justify-content-start">
+                <div class="flex align-items-center justify-content-start font-bold">
                     Product<span *ngIf="analytics.length > 0">&nbsp;{{ analyticIndex + 1 }} of {{ analytics.length }}</span>
                 </div>
                 <div class="flex align-items-center justify-content-end h-full">
-                    <div>
+                    <div *ngIf="analytics.length > 0">
                         <p-paginator (onPageChange)="onProductPageChange($event)" [first]="paginatorFirstProduct" [rows]="1" [totalRecords]="analytics.length"> </p-paginator>
                     </div>
                     <div>
                         <p-buttonGroup>
-                            <p-button icon="pi pi-plus" severity="secondary" title="Add New" (click)="addAnalytic()" />
-                            <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" />
-                            <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="deleteAnalytic()" />
+                            <p-button icon="pi pi-plus" severity="secondary" title="Add New" (click)="addAnalytic()" *ngIf="isReadWrite" />
+                            <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" *ngIf="isReadWrite && analytics.length > 0" />
+                            <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="deleteAnalytic()" *ngIf="isReadWrite && analytics.length > 0" />
+                            <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" *ngIf="analytics.length > 0" />
                         </p-buttonGroup>
                     </div>
                 </div>
             </div>
         </ng-template>
         <ng-template pTemplate="footer">
-            <div class="flex align-items-center justify-content-end h-full">
+            <div class="flex align-items-center justify-content-end h-full" *ngIf="analyticIndex >= 0">
                 <div>
                     <p-paginator (onPageChange)="onProductPageChange($event)" [first]="paginatorFirstProduct" [rows]="1" [totalRecords]="analytics.length"> </p-paginator>
                 </div>
                 <div>
                     <p-buttonGroup>
-                        <p-button icon="pi pi-plus" severity="secondary" title="Add New" (click)="addAnalytic()" />
-                        <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" />
-                        <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="deleteAnalytic()" />
+                        <p-button icon="pi pi-plus" severity="secondary" title="Add New" (click)="addAnalytic()" *ngIf="isReadWrite" />
+                        <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" *ngIf="isReadWrite" />
+                        <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="deleteAnalytic()" *ngIf="isReadWrite" />
+                        <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" />
                     </p-buttonGroup>
                 </div>
             </div>
         </ng-template>
-        <ng-template #productTemplate [ngTemplateOutlet]="productTemplate" let-product [ngTemplateOutletContext]="{ $implicit: analytics[analyticIndex] }">
+        <ng-template #productTemplate1 [ngTemplateOutlet]="productTemplate1" let-product [ngTemplateOutletContext]="{ $implicit: analytics[analyticIndex] }">
             <div *ngIf="analyticIndex >= 0" class="flex flex-column flex-nowrap">
                 <div class="mt-2 grid">
                     <div class="col-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="pBrandName" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="!!analytics[analyticIndex].analyticId" [(ngModel)]="product.brandName.analyticSetupId" />
-                            <label for="pBrandName">Brand Name</label>
-                        </p-floatLabel>
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown
+                                    inputId="pBrandName"
+                                    [options]="analyticSetups['BrandNameId']"
+                                    optionLabel="name"
+                                    optionValue="analyticSetupId"
+                                    [style]="{ 'min-width': '200px' }"
+                                    dataKey="name"
+                                    [readonly]="!!analytics[analyticIndex].analyticId"
+                                    [(ngModel)]="product.brandName.analyticSetupId"
+                                />
+                                <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(1)" *ngIf="product.analyticId === 0"></button>
+                                <label for="pBrandName">Brand Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
                     </div>
                     <div class="col-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="pGenericName" [options]="analyticSetups['GenericNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="!!analytics[analyticIndex].analyticId" [(ngModel)]="product.genericName.analyticSetupId" />
-                            <label for="pGenericName">Generic Name</label>
-                        </p-floatLabel>
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown
+                                    inputId="pGenericName"
+                                    [options]="analyticSetups['GenericNameId']"
+                                    optionLabel="name"
+                                    optionValue="analyticSetupId"
+                                    [style]="{ 'min-width': '200px' }"
+                                    dataKey="name"
+                                    [readonly]="!!analytics[analyticIndex].analyticId"
+                                    [(ngModel)]="product.genericName.analyticSetupId"
+                                />
+                                <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(2)" *ngIf="product.analyticId === 0"></button>
+                                <label for="pGenericName">Generic Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
                     </div>
                     <div class="col-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="pManufacturer" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [readonly]="!!analytics[analyticIndex].analyticId" [(ngModel)]="product.manufacturer.analyticSetupId" />
-                            <label for="pManufacturer">Manufacturer Name</label>
-                        </p-floatLabel>
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown
+                                    inputId="pManufacturer"
+                                    [options]="analyticSetups['ManufacturerId']"
+                                    optionLabel="name"
+                                    optionValue="analyticSetupId"
+                                    [style]="{ 'min-width': '200px' }"
+                                    dataKey="name"
+                                    [readonly]="!!analytics[analyticIndex].analyticId"
+                                    [(ngModel)]="product.manufacturer.analyticSetupId"
+                                />
+                                <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(3)" *ngIf="product.analyticId === 0"></button>
+                                <label for="pManufacturer">Manufacturer Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
                     </div>
                 </div>
                 <div class="mt-2 grid">
@@ -140,8 +179,11 @@
                     <div class="flex flex-column gap-2 text-center">
                         <div><label for="additionalManufacturers">Additional Manufacturer products in same TA</label></div>
                         <div><p-triStateCheckbox inputId="additionalManufacturers" [(ngModel)]="product.isAdditionalManufacturerProductsInSameTa" styleClass="tri" /></div>
-                        <div *ngIf="product.isAdditionalManufacturerProductsInSameTa">
-                            <p-multiSelect [(ngModel)]="product.additionalManufacturerProductsInSameTas" [options]="analyticSetups['AdditionalManufacturersInSameTA']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                        <div *ngIf="product.isAdditionalManufacturerProductsInSameTa" [style]="{ 'min-width': '200px' }">
+                            <p-inputGroup>
+                                <p-multiSelect [(ngModel)]="product.additionalManufacturerProductsInSameTas" [options]="analyticSetups['AdditionalManufacturersInSameTA']" optionLabel="name" dataKey="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                                <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(6)"></button>
+                            </p-inputGroup>
                         </div>
                     </div>
                     <div class="flex flex-column gap-2 text-center">
@@ -156,10 +198,10 @@
                     </div>
                 </div>
             </div>
-            <p-panel styleClass="third-header-no-padding" *ngIf="analyticIndex >= 0">
+            <p-panel styleClass="mt-3 third-header-no-padding" *ngIf="analyticIndex >= 0 && (isReadWrite || !!analytics[analyticIndex].analyticIndications?.length)">
                 <ng-template pTemplate="header">
                     <div class="flex flex-row flex-wrap justify-content-between w-full">
-                        <div class="flex align-items-center justify-content-start">
+                        <div class="flex align-items-center justify-content-start font-bold">
                             Indication<span *ngIf="!!analytics[analyticIndex].analyticIndications?.length">&nbsp;{{ indicationIndex + 1 }} of {{ analytics[analyticIndex].analyticIndications.length }}</span>
                         </div>
                         <div class="flex align-items-center justify-content-end h-full">
@@ -168,8 +210,8 @@
                             </div>
                             <div>
                                 <p-buttonGroup>
-                                    <p-button icon="pi pi-plus" severity="success" title="Add New" (click)="addAnalyticIndication()" />
-                                    <p-button icon="pi pi-trash" severity="success" title="Delete" (click)="deleteAnalyticIndication()" />
+                                    <p-button icon="pi pi-plus" severity="success" title="Add New" (click)="addAnalyticIndication()" *ngIf="isReadWrite" />
+                                    <p-button icon="pi pi-trash" severity="success" title="Delete" (click)="deleteAnalyticIndication()" *ngIf="isReadWrite" />
                                 </p-buttonGroup>
                             </div>
                         </div>
@@ -307,7 +349,7 @@
                         <p-panel styleClass="fourth-header-no-padding">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
-                                    <div class="flex align-items-center justify-content-start">Pricing & Distribution</div>
+                                    <div class="flex align-items-center justify-content-start font-bold">Pricing & Distribution</div>
                                 </div>
                             </ng-template>
                             <div class="flex flex-row mt-4 gap-4">
@@ -335,7 +377,7 @@
                                 </div>
                                 <div class="col-2">
                                     <p-floatLabel>
-                                        <p-multiSelect inputId="iSiteOfCare" [(ngModel)]="analyticIndication.details['SiteOfCare']" [options]="analyticSetups['SiteOfCare']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                        <p-multiSelect inputId="iSiteOfCare" [filter]="false" [(ngModel)]="analyticIndication.details['SiteOfCare']" [options]="analyticSetups['SiteOfCare']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
                                         <label for="iBenefitId">Site of Care</label>
                                     </p-floatLabel>
                                 </div>
@@ -343,6 +385,7 @@
                                     <p-floatLabel>
                                         <p-multiSelect
                                             inputId="iDistributionChannel"
+                                            [filter]="false"
                                             [(ngModel)]="analyticIndication.details['DistributionChannel']"
                                             [options]="analyticSetups['DistributionChannel']"
                                             optionLabel="name"
@@ -377,15 +420,7 @@
                                 </div>
                                 <div class="col-2">
                                     <p-floatLabel>
-                                        <p-dropdown
-                                            inputId="iLevelOfRebateContracting"
-                                            [(ngModel)]="analyticIndication.levelOfRebateContractingId"
-                                            [options]="analyticSetups['LevelOfRebateContracting']"
-                                            optionLabel="name"
-                                            optionValue="analyticSetupId"
-                                            [style]="{ 'min-width': '200px' }"
-                                            styleClass="w-full"
-                                        />
+                                        <p-dropdown inputId="iLevelOfRebateContracting" [(ngModel)]="analyticIndication.levelOfRebateContractingId" [options]="analyticSetups['LevelOfRebateContracting']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
                                         <label for="iLevelOfRebateContracting">Level of Rebate Contracting</label>
                                     </p-floatLabel>
                                 </div>
@@ -396,7 +431,7 @@
                         <p-panel styleClass="fourth-header-no-padding">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
-                                    <div class="flex align-items-center justify-content-start">Competition</div>
+                                    <div class="flex align-items-center justify-content-start font-bold">Competition</div>
                                 </div>
                             </ng-template>
                             <div class="flex flex-row">
@@ -467,7 +502,15 @@
                                 <p-table [value]="analyticIndication.analyticIndicationCompetitions" [tableStyle]="{ 'min-width': '50rem' }">
                                     <ng-template pTemplate="header">
                                         <tr>
-                                            <th></th>
+                                            <th>
+                                                <p-button
+                                                    icon="pi pi-plus"
+                                                    severity="secondary"
+                                                    title="Add"
+                                                    *ngIf="isReadWrite"
+                                                    (click)="analyticIndication.analyticIndicationCompetitions.push({ competitorProduct: {}, competitorManufacturer: {}, clinicalBenefitOverCompetitor: {}, safety: {} })"
+                                                ></p-button>
+                                            </th>
                                             <th>Product</th>
                                             <th>Price</th>
                                             <th>Manufacturer</th>
@@ -475,14 +518,24 @@
                                             <th>Safety Benefit Over Competitor</th>
                                         </tr>
                                     </ng-template>
-                                    <ng-template pTemplate="body" let-competitor>
+                                    <ng-template pTemplate="body" let-competitor let-idx="rowIndex">
                                         <tr>
-                                            <td><p-button icon="pi pi-trash" severity="danger" title="Delete" /></td>
-                                            <td><p-dropdown appendTo="body" [(ngModel)]="competitor.competitorProductId" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" /></td>
+                                            <td><p-button icon="pi pi-trash" severity="danger" title="Delete" *ngIf="isReadWrite" (click)="deleteCompetition(idx)"></p-button></td>
+                                            <td>
+                                                <p-inputGroup
+                                                    ><p-dropdown appendTo="body" [(ngModel)]="competitor.competitorProduct.name" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="name" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                                    <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(4, idx)" *ngIf="isReadWrite"></button>
+                                                </p-inputGroup>
+                                            </td>
                                             <td>
                                                 <p-inputNumber [(ngModel)]="competitor.competitorPrice" mode="currency" currency="USD" locale="en-US" />
                                             </td>
-                                            <td><p-dropdown appendTo="body" [(ngModel)]="competitor.competitorManufacturerId" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" /></td>
+                                            <td>
+                                                <p-inputGroup>
+                                                    <p-dropdown appendTo="body" [(ngModel)]="competitor.competitorManufacturer.name" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="name" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                                    <button type="button" pButton icon="pi pi-plus" class="p-button-secondary" (click)="showDialog(5, idx)" *ngIf="isReadWrite"></button>
+                                                </p-inputGroup>
+                                            </td>
                                             <td>
                                                 <p-dropdown
                                                     appendTo="body"
@@ -505,7 +558,7 @@
                         <p-panel styleClass="fourth-header-no-padding">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
-                                    <div class="flex align-items-center justify-content-start">Economic and Clinical Differentiation</div>
+                                    <div class="flex align-items-center justify-content-start font-bold">Economic and Clinical Differentiation</div>
                                 </div>
                             </ng-template>
                             <div class="flex flex-row">
@@ -570,4 +623,540 @@
             </p-panel>
         </ng-template>
     </p-panel>
+
+    <app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>
+
+    <div class="card flex justify-content-center">
+        <p-dialog [header]="headerNew" [modal]="true" [(visible)]="isNewVisible" [style]="{ width: '25rem' }">
+            <div class="flex align-items-center gap-3 mb-3">
+                <input pInputText [formControl]="newItemCtrl" class="flex-auto" autocomplete="off" />
+            </div>
+
+            <div class="flex justify-content-end gap-2">
+                <p-button label="Cancel" severity="secondary" (onClick)="isNewVisible = false" />
+                <p-button label="Save" (onClick)="saveNew()" />
+            </div>
+        </p-dialog>
+    </div>
 </div>
+<div class="for-print">
+    <ng-container *ngTemplateOutlet="analyticsTemplate; context: { $implicit: analytics }"></ng-container>
+</div>
+
+<p-dialog [modal]="true" [(visible)]="showPdf" [showHeader]="false">
+    <ng-template pTemplate="header"></ng-template>
+    <div id="pdf-content" class="m-1">
+        <ng-container *ngTemplateOutlet="analyticsTemplate; context: { $implicit: analytics }"></ng-container>
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end">
+            <p-button label="PDF" icon="pi pi-file-pdf" class="mr-1" [raised]="true" [text]="true" (click)="generatePdf()" />
+            <p-button label="Close" icon="pi pi-times" class="mr-1" [raised]="true" [text]="true" (click)="showPdf = false" />
+        </div>
+    </ng-template>
+</p-dialog>
+<ng-template #analyticsTemplate let-analytics>
+    <p-panel styleClass="secondary-header" *ngFor="let analytic of analytics; let analyticIndex2 = index">
+        <ng-template pTemplate="header">
+            <div class="flex flex-row flex-wrap justify-content-between w-full">
+                <div class="flex align-items-center justify-content-start font-bold">
+                    Product<span *ngIf="analytics.length > 0">&nbsp;{{ analyticIndex2 + 1 }} of {{ analytics.length }}</span>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #productTemplate2 [ngTemplateOutlet]="productTemplate2" let-product [ngTemplateOutletContext]="{ $implicit: analytic }">
+            <div *ngIf="analyticIndex2 >= 0" class="flex flex-column flex-nowrap">
+                <div class="mt-2 grid">
+                    <div class="col-3">
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown inputId="pBrandName" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" dataKey="name" [readonly]="!!analytic.analyticId" [(ngModel)]="product.brandName.analyticSetupId" />
+                                <label for="pBrandName">Brand Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
+                    </div>
+                    <div class="col-3">
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown inputId="pGenericName" [options]="analyticSetups['GenericNameId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" dataKey="name" [readonly]="!!analytic.analyticId" [(ngModel)]="product.genericName.analyticSetupId" />
+                                <label for="pGenericName">Generic Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
+                    </div>
+                    <div class="col-3">
+                        <p-inputGroup>
+                            <p-floatLabel>
+                                <p-dropdown inputId="pManufacturer" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" dataKey="name" [readonly]="!!analytic.analyticId" [(ngModel)]="product.manufacturer.analyticSetupId" />
+                                <label for="pManufacturer">Manufacturer Name</label>
+                            </p-floatLabel>
+                        </p-inputGroup>
+                    </div>
+                </div>
+                <div class="mt-2 grid">
+                    <div class="col-3">
+                        <p-floatLabel>
+                            <p-calendar [(ngModel)]="product.dateOfEntryIntoMarket" inputId="date_of_entry" [style]="{ 'min-width': '200px' }" />
+                            <label for="date_of_entry">Date of Entry into Market</label>
+                        </p-floatLabel>
+                    </div>
+                    <div class="col-3">
+                        <p-floatLabel>
+                            <p-calendar [(ngModel)]="product.fdaApproval" inputId="fda_approval" [style]="{ 'min-width': '200px' }" />
+                            <label for="fda_approval">FDA Approval</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="mt-2 grid">
+                    <div class="col-6">
+                        <p-floatLabel>
+                            <textarea [(ngModel)]="product.mechanismOfAction" id="mechanism-of-action" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                            <label for="mechanism-of-action">Mechanism of Action</label>
+                        </p-floatLabel>
+                    </div>
+                    <div class="col-3">
+                        <p-floatLabel>
+                            <p-dropdown inputId="pApprovalStatus" [options]="analyticSetups['ApprovalStatusId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [(ngModel)]="product.approvalStatusId" [showClear]="true" />
+                            <label for="pApprovalStatus">Approval Status</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-row flex-wrap justify-content-left gap-7">
+                    <div class="flex flex-column gap-2 text-center">
+                        <div>
+                            <label for="505b2">505b2</label>
+                        </div>
+                        <div>
+                            <p-triStateCheckbox inputId="505b2" [(ngModel)]="product.is505B2" styleClass="tri" />
+                        </div>
+                    </div>
+                    <div class="flex flex-column gap-2 text-center">
+                        <div><label for="biosimilar">Biosimilar</label></div>
+                        <div><p-triStateCheckbox inputId="biosimilar" [(ngModel)]="product.isBiosimilar" styleClass="tri" /></div>
+                    </div>
+                    <div class="flex flex-column gap-2 text-center">
+                        <div><label for="blackBoxWarning">Black Box Warning</label></div>
+                        <div><p-triStateCheckbox inputId="blackBoxWarning" [(ngModel)]="product.isBlackBoxWarning" styleClass="tri" /></div>
+                    </div>
+                    <div class="flex flex-column gap-2 text-center">
+                        <div><label for="additionalManufacturers">Additional Manufacturer products in same TA</label></div>
+                        <div><p-triStateCheckbox inputId="additionalManufacturers" [(ngModel)]="product.isAdditionalManufacturerProductsInSameTa" styleClass="tri" /></div>
+                        <div *ngIf="product.isAdditionalManufacturerProductsInSameTa">
+                            <p-inputGroup>
+                                <p-multiSelect [(ngModel)]="product.additionalManufacturerProductsInSameTas" [options]="analyticSetups['AdditionalManufacturersInSameTA']" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="analyticSetupId" />
+                            </p-inputGroup>
+                        </div>
+                    </div>
+                    <div class="flex flex-column gap-2 text-center">
+                        <div><label for="firstInClass">First In Class</label></div>
+                        <div><p-triStateCheckbox inputId="firstInClass" [ngModel]="product.isFirstInClass" styleClass="tri" /></div>
+                    </div>
+                    <div>
+                        <p-floatLabel>
+                            <p-dropdown inputId="pComplexity" [options]="analyticSetups['ComplexityOfTherapyId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" [(ngModel)]="product.complexityOfTherapyId" [showClear]="true" />
+                            <label for="pComplexity">Complexity of Therapy</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+            </div>
+            <p-panel styleClass="mt-3 third-header-no-padding" *ngFor="let analyticIndication of analytic.analyticIndications; let indicationIndex2 = index">
+                <ng-template pTemplate="header">
+                    <div class="flex flex-row flex-wrap justify-content-between w-full">
+                        <div class="flex align-items-center justify-content-start font-bold">
+                            Indication<span *ngIf="!!analytic.analyticIndications?.length">&nbsp;{{ indicationIndex2 + 1 }} of {{ analytic.analyticIndications.length }}</span>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template *ngIf="!!analytic.analyticIndications?.length" #indicationTemplate [ngTemplateOutlet]="indicationTemplate" let-analyticIndication [ngTemplateOutletContext]="{ $implicit: analyticIndication }">
+                    <p-tabView>
+                        <p-tabPanel *ngFor="let dosing of dosingItems; let idx = index">
+                            <ng-template pTemplate="header">
+                                <div class="flex flex-row gap-2">
+                                    <div><p-checkbox [(ngModel)]="analyticIndication[dosing.field]" [binary]="true" inputId="binary" /></div>
+                                    <div>{{ dosing.title }}</div>
+                                </div>
+                            </ng-template>
+                            <div>
+                                <textarea [(ngModel)]="analyticIndication[dosing.noteField]" id="dosingPo" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                            </div>
+                        </p-tabPanel>
+                    </p-tabView>
+                    <div class="flex flex-row gap-4 mt-2">
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <p-multiSelect inputId="iAge" [(ngModel)]="analyticIndication.details['Age']" [options]="analyticSetups['Age']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                <label for="iAge">Age</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <p-dropdown inputId="iUsageId" [(ngModel)]="analyticIndication.usageId" [options]="analyticSetups['UsageId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                <label for="iUsageId">Usage</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <p-dropdown inputId="iPatientPopulationSizeId" [(ngModel)]="analyticIndication.patientPopulationSizeId" [options]="analyticSetups['PatientPopulationSizeId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                <label for="iPatientPopulationSizeId">Patient Population Size</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <p-dropdown inputId="iLineOfTherapyId" [(ngModel)]="analyticIndication.lineOfTherapyId" [options]="analyticSetups['LineOfTherapyId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                <label for="iLineOfTherapyId">Line of Therapy</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <p-dropdown inputId="iTreatmentTypeId" [(ngModel)]="analyticIndication.treatmentTypeId" [options]="analyticSetups['TreatmentTypeId']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                <label for="iTreatmentTypeId">Treatment Type</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div class="flex flex-row gap-4 mt-4">
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.indication" id="iIndication" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iIndication">Indication</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.mostCommonUse" id="iMostCommonUse" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iMostCommonUse">Most Common Use</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div class="flex flex-row gap-4 mt-4">
+                        <div class="col-3 flex gap-4 p-0">
+                            <div class="flex-grow flex-column gap-2 text-center col-6">
+                                <div>
+                                    <label for="iIsOrphanDrugStatus">Orphan Drug Status</label>
+                                </div>
+                                <div>
+                                    <p-triStateCheckbox inputId="iIsOrphanDrugStatus" [(ngModel)]="analyticIndication.isOrphanDrugStatus" styleClass="tri" />
+                                </div>
+                            </div>
+                            <div class="flex-grow flex-column gap-2 text-center col-6">
+                                <div>
+                                    <label for="iIsOncology">Oncology</label>
+                                </div>
+                                <div>
+                                    <p-triStateCheckbox inputId="iIsOncology" [(ngModel)]="analyticIndication.isOncology" styleClass="tri" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOncology">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.currentCancerType" id="iCurrentCancerType" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iCurrentCancerType">Most Common Use</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOncology">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.otherAreasOfStudy" id="iOtherAreasOfStudy" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iOtherAreasOfStudy">Other Areas of Study</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOncology">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.nccnGuidelines" id="iNccnGuidelines" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iNccnGuidelines">NCCN Guidelines</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div class="flex flex-row gap-4 mt-4">
+                        <div class="col-3">
+                            <div class="flex flex-column gap-2 text-center col-6 p-0">
+                                <div>
+                                    <label for="iIsOffLabelUse">Off-Label Use</label>
+                                </div>
+                                <div>
+                                    <p-triStateCheckbox inputId="iIsOffLabelUse" [(ngModel)]="analyticIndication.isOffLabelUse" styleClass="tri" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOffLabelUse">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.cancerType" id="iCancerType" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iCancerType">Cancer Type</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOffLabelUse">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.offLabelNccnGuidelines" id="iOffLabelNccnGuidelines" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iOffLabelNccnGuidelines">NCCN Guidelines</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1 flex-column gap-2 text-center" *ngIf="analyticIndication.isOffLabelUse">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="analyticIndication.lineOfTherapyString" id="iLineOfTherapyString" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                <label for="iLineOfTherapyString">Line of Therapy</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div>
+                        <p-panel styleClass="fourth-header-no-padding">
+                            <ng-template pTemplate="header">
+                                <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
+                                    <div class="flex align-items-center justify-content-start font-bold">Pricing & Distribution</div>
+                                </div>
+                            </ng-template>
+                            <div class="flex flex-row mt-4 gap-4">
+                                <div class="col-2">
+                                    <p-inputGroup>
+                                        <p-inputGroupAddon>
+                                            <i class="pi pi-dollar"></i>
+                                        </p-inputGroupAddon>
+                                        <input pInputText placeholder="WAC per Unit" [(ngModel)]="analyticIndication.wacPerUnit" />
+                                    </p-inputGroup>
+                                </div>
+                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                    <div>
+                                        <label for="iIsPriceIncreasedBy5">Price Increased By > 5%</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsPriceIncreasedBy5" [(ngModel)]="analyticIndication.isPriceIncreasedBy5" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <p-dropdown inputId="iBenefitId" [(ngModel)]="analyticIndication.benefitId" [options]="analyticSetups['Benefit']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                        <label for="iBenefitId">Benefit</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <p-multiSelect inputId="iSiteOfCare" [filter]="false" [(ngModel)]="analyticIndication.details['SiteOfCare']" [options]="analyticSetups['SiteOfCare']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                                        <label for="iBenefitId">Site of Care</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <p-multiSelect
+                                            inputId="iDistributionChannel"
+                                            [filter]="false"
+                                            [(ngModel)]="analyticIndication.details['DistributionChannel']"
+                                            [options]="analyticSetups['DistributionChannel']"
+                                            optionLabel="name"
+                                            optionValue="analyticSetupId"
+                                            [style]="{ 'min-width': '200px' }"
+                                            styleClass="w-full"
+                                        />
+                                        <label for="iDistributionChannel">Distribution Channel</label>
+                                    </p-floatLabel>
+                                </div>
+                            </div>
+                            <div class="flex flex-row mt-4 gap-4">
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <input inputId="iUnitPerPackage" pInputText [(ngModel)]="analyticIndication.unitPerPackage" />
+                                        <label for="iUnitPerPackage">Unit per Package</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                    <div>
+                                        <label for="iIsRebateContracting">Rebate Contracting</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsRebateContracting" [(ngModel)]="analyticIndication.isRebateContracting" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <p-dropdown inputId="iPayerTypeId" [(ngModel)]="analyticIndication.payerTypeId" [options]="analyticSetups['PayerType']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                        <label for="iPayerTypeId">Payer Type</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="col-2">
+                                    <p-floatLabel>
+                                        <p-dropdown inputId="iLevelOfRebateContracting" [(ngModel)]="analyticIndication.levelOfRebateContractingId" [options]="analyticSetups['LevelOfRebateContracting']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" />
+                                        <label for="iLevelOfRebateContracting">Level of Rebate Contracting</label>
+                                    </p-floatLabel>
+                                </div>
+                            </div>
+                        </p-panel>
+                    </div>
+                    <div>
+                        <p-panel styleClass="fourth-header-no-padding">
+                            <ng-template pTemplate="header">
+                                <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
+                                    <div class="flex align-items-center justify-content-start font-bold">Competition</div>
+                                </div>
+                            </ng-template>
+                            <div class="flex flex-row">
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsPatentExpiration">Patent Expiration / Loss of Exclusivity</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsPatentExpiration" [(ngModel)]="analyticIndication.isPatentExpiration" styleClass="tri" />
+                                    </div>
+                                    <div *ngIf="analyticIndication.isPatentExpiration" class="mt-4">
+                                        <p-floatLabel>
+                                            <p-calendar [(ngModel)]="analyticIndication.patentExpirationDate" inputId="iPatentExpirationDate" [style]="{ 'min-width': '200px' }" />
+                                            <label for="iPatentExpirationDate">Date of Review</label>
+                                        </p-floatLabel>
+                                    </div>
+                                </div>
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsGenericCompetition">Generic Competition</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsGenericCompetition" [(ngModel)]="analyticIndication.isGenericCompetition" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <p-floatLabel>
+                                        <p-calendar [(ngModel)]="analyticIndication.whenIsGenericCompetitionAnticipated" inputId="iWhenIsGenericCompetitionAnticipated" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                        <label for="iWhenIsGenericCompetitionAnticipated">When is Generic Competition Anticipated?</label>
+                                    </p-floatLabel>
+                                </div>
+                            </div>
+                            <div class="flex flex-row">
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsBiosimilarCompetition">Biosimilar Competition</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsBiosimilarCompetition" [(ngModel)]="analyticIndication.isBiosimilarCompetition" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsBrandCompetition">Brand Competition</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsBrandCompetition" [(ngModel)]="analyticIndication.isBrandCompetition" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIs505B2Competition">505b2 Competition</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIs505B2Competition" [(ngModel)]="analyticIndication.is505B2Competition" styleClass="tri" />
+                                    </div>
+                                </div>
+                                <div class="flex col-3 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsAuthorizedGenericCompetition">Authorized Generic Competition</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsAuthorizedGenericCompetition" [(ngModel)]="analyticIndication.isAuthorizedGenericCompetition" styleClass="tri" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <p-table [value]="analyticIndication.analyticIndicationCompetitions" [tableStyle]="{ 'min-width': '50rem' }">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Price</th>
+                                            <th>Manufacturer</th>
+                                            <th>Clinical Benefit Over Competitor</th>
+                                            <th>Safety Benefit Over Competitor</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-competitor let-idx="rowIndex">
+                                        <tr>
+                                            <td>
+                                                <p-inputGroup><p-dropdown appendTo="body" [(ngModel)]="competitor.competitorProduct.name" [options]="analyticSetups['BrandNameId']" optionLabel="name" optionValue="name" [style]="{ 'min-width': '200px' }" styleClass="w-full" /> </p-inputGroup>
+                                            </td>
+                                            <td>
+                                                <p-inputNumber [(ngModel)]="competitor.competitorPrice" mode="currency" currency="USD" locale="en-US" />
+                                            </td>
+                                            <td>
+                                                <p-inputGroup>
+                                                    <p-dropdown appendTo="body" [(ngModel)]="competitor.competitorManufacturer.name" [options]="analyticSetups['ManufacturerId']" optionLabel="name" optionValue="name" [style]="{ 'min-width': '200px' }" styleClass="w-full" />
+                                                </p-inputGroup>
+                                            </td>
+                                            <td>
+                                                <p-dropdown
+                                                    appendTo="body"
+                                                    [(ngModel)]="competitor.clinicalBenefitOverCompetitorId"
+                                                    [options]="analyticSetups['ClinicalBenefitOverCompetitorId']"
+                                                    optionLabel="name"
+                                                    optionValue="analyticSetupId"
+                                                    [style]="{ 'min-width': '200px' }"
+                                                    styleClass="w-full"
+                                                />
+                                            </td>
+                                            <td><p-dropdown appendTo="body" [(ngModel)]="competitor.safetyId" [options]="analyticSetups['Safety']" optionLabel="name" optionValue="analyticSetupId" [style]="{ 'min-width': '200px' }" styleClass="w-full" /></td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </p-panel>
+                    </div>
+                    <div>
+                        <p-panel styleClass="fourth-header-no-padding">
+                            <ng-template pTemplate="header">
+                                <div class="flex flex-row flex-wrap justify-content-between w-full" style="height: 50px">
+                                    <div class="flex align-items-center justify-content-start font-bold">Economic and Clinical Differentiation</div>
+                                </div>
+                            </ng-template>
+                            <div class="flex flex-row">
+                                <div class="flex col-4 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsIcerReview">ICER Review</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsIcerReview" [(ngModel)]="analyticIndication.isIcerReview" styleClass="tri" />
+                                    </div>
+                                    <div *ngIf="analyticIndication.isIcerReview" class="mt-4">
+                                        <p-floatLabel>
+                                            <p-calendar [(ngModel)]="analyticIndication.icerReviewDate" inputId="icer_review_date" [style]="{ 'min-width': '200px' }" />
+                                            <label for="icer_review_date">Date of Review</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div *ngIf="analyticIndication.isIcerReview" class="mt-4">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="analyticIndication.icerReviewDetails" id="iIcerReviewDetails" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                            <label for="iIcerReviewDetails">ICER Review Details</label>
+                                        </p-floatLabel>
+                                    </div>
+                                </div>
+                                <div class="flex col-4 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsClinicalEfficacyDifferentiation">Clinical Efficacy Differentiation</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsClinicalEfficacyDifferentiation" [(ngModel)]="analyticIndication.isClinicalEfficacyDifferentiation" styleClass="tri" />
+                                    </div>
+                                    <div *ngIf="analyticIndication.isClinicalEfficacyDifferentiation" class="mt-4">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="analyticIndication.clinicalEfficacyDifferentiation" id="iClinicalEfficacyDifferentiation" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                            <label for="iClinicalEfficacyDifferentiation">Clinical Efficacy Differentiation Details</label>
+                                        </p-floatLabel>
+                                    </div>
+                                </div>
+                                <div class="flex col-4 flex-column gap-2">
+                                    <div>
+                                        <label for="iIsClinicalSafetyDifferentiation">Clinical Safety Differentiation</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="iIsClinicalSafetyDifferentiation" [(ngModel)]="analyticIndication.isClinicalSafetyDifferentiation" styleClass="tri" />
+                                    </div>
+                                    <div *ngIf="analyticIndication.isClinicalSafetyDifferentiation" class="mt-4">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="analyticIndication.clinicalSafetyDifferentiation" id="iClinicalSafetyDifferentiation" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                                            <label for="iClinicalSafetyDifferentiation">Clinical Safety Differentiation Details</label>
+                                        </p-floatLabel>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-panel>
+                    </div>
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <textarea [(ngModel)]="product.additionalInformation" id="pAdditionalInformation" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                            <label for="pAdditionalInformation">Additional Information</label>
+                        </p-floatLabel>
+                    </div>
+                </ng-template>
+            </p-panel>
+        </ng-template>
+        <p style="page-break-after: always"></p>
+    </p-panel>
+</ng-template>
