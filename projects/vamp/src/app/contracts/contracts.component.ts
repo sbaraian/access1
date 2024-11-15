@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from "@angular/common";
+import { CommonModule } from "@angular/common";
 import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
@@ -28,7 +28,7 @@ import { ContractsService } from "./contracts.service";
 @Component({
     selector: "app-contracts",
     standalone: true,
-    imports: [AsyncPipe, ButtonModule, ButtonGroupModule, FloatLabelModule, DropdownModule, PanelModule, ToastModule, ReactiveFormsModule, CommonModule, TableModule, MultiSelectModule, OverlayPanelModule, DynamicDialogModule],
+    imports: [ButtonModule, ButtonGroupModule, FloatLabelModule, DropdownModule, PanelModule, ToastModule, ReactiveFormsModule, CommonModule, TableModule, MultiSelectModule, OverlayPanelModule, DynamicDialogModule],
     templateUrl: "./contracts.component.html",
     styleUrl: "./contracts.component.scss",
     providers: [DialogService],
@@ -182,6 +182,7 @@ export class ContractsComponent implements OnInit {
             )
             .subscribe();
         this.cols = [
+            { field: "contractId", header: "Id" },
             { field: "status", header: "Contract Status" },
             { field: "client.name", header: "Client" },
             { field: "payor.name", header: "Payor" },
@@ -206,15 +207,19 @@ export class ContractsComponent implements OnInit {
                             this.accountManagerCtrl.setValue(accountManager);
                         }
                     }
+                    if (!this.currentAccountManager) {
+                        this.currentAccountManager = this.accountManagers[0];
+                        this.accountManagerCtrl.setValue(this.currentAccountManager);
+                    }
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        for (var year = DateTime.now().year; year >= 2024; year--) {
+        for (var year = DateTime.now().year + 1; year >= 2024; year--) {
             this.years.push(year);
         }
         if (this.years.length) {
-            this.yearsCtrl.setValue(this.years[0]);
+            this.yearsCtrl.setValue(this.years[1]);
         }
         this.contractStatusCtrl.setValue(this.contractStatuses[0]);
         this.daysUntilRenewalCtrl.setValue(this.daysUntilRenewals[0]);
@@ -243,7 +248,7 @@ export class ContractsComponent implements OnInit {
                 this.yearsCtrl.value,
             )
             .pipe(
-                tap((data) => (this.data = [...data, ...data, ...data, ...data])),
+                tap((data) => (this.data = data)),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();

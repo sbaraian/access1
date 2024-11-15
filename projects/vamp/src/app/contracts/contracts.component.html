@@ -82,15 +82,27 @@
     <div>
         <p-panel styleClass="secondary-header">
             <div class="card" style="height: 60vh">
-                <p-table [columns]="selectedColumns" [value]="data" styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }" [scrollable]="true" scrollHeight="flex">
+                <p-table
+                    [columns]="selectedColumns"
+                    [value]="data"
+                    styleClass="p-datatable-striped"
+                    [tableStyle]="{ 'min-width': '50rem' }"
+                    [scrollable]="true"
+                    scrollHeight="flex"
+                    sortField="contractId"
+                    [sortOrder]="-1"
+                    selectionMode="single"
+                    dataKey="contractId"
+                    [rowsPerPageOptions]="[10, 20, 30]"
+                    [paginator]="true"
+                    [rows]="10"
+                >
                     <ng-template pTemplate="header" let-columns>
                         <tr>
                             <th>
                                 <p-button (onClick)="op.toggle($event)" icon="pi pi-bars" /> <p-overlayPanel #op><p-multiSelect [options]="cols" [formControl]="selectedColumnsCtrl" optionLabel="header" placeholder="Please select columns"> </p-multiSelect></p-overlayPanel>
                             </th>
-                            <th *ngFor="let col of columns">
-                                {{ col.header }}
-                            </th>
+                            <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
                         </tr>
                     </ng-template>
 

@@ -20,7 +20,12 @@
                         </div>
                     </div>
                     <div class="circle-container" style="flex-grow: 3; gap: 0">
-                        <div class="border-solid border-1 border-gray-500 text-center w-full p-1" style="background-color: #adc8e8">In Review</div>
+                        <div class="border-solid border-1 border-gray-500 text-center w-full p-1" style="background-color: #adc8e8">
+                            <div class="flex justify-content-between">
+                                <div class="flex-grow-1 justify-content-center">In Review</div>
+                                <div><p-button icon="pi pi-list" severity="secondary" title="Notes" (click)="isNotesVisible = true" /></div>
+                            </div>
+                        </div>
                         <div class="flex justify-content-around w-full border-solid border-1 border-gray-500 p-1">
                             <div class="circle-container">
                                 <div class="circle" style="background-color: #59b485">Viking</div>
@@ -369,7 +374,7 @@
                                                         <p-inputGroupAddon>
                                                             <i class="pi pi-percentage"></i>
                                                         </p-inputGroupAddon>
-                                                        <input pInputText [(ngModel)]="ppa.ppCap" />
+                                                        <input pInputText [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
                                                     </p-inputGroup>
                                                 </td>
                                                 <td><input pInputText [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
@@ -390,6 +395,14 @@
                                                     </p-inputGroup>
                                                 </td>
                                                 <td><button type="button" pButton pRipple icon="pi pi-trash" (click)="deletePpa(productChannel, ri)" severity="danger"></button></td>
+                                            </tr>
+                                            <tr *ngIf="($any(ppa.ppCap) + '')?.toLowerCase() === 'cpi'">
+                                                <td colspan="8">
+                                                    <p-floatLabel>
+                                                        <textarea [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                        <label for="threeYearAverageMedicalCpi">3 Year Average Medical CPI</label>
+                                                    </p-floatLabel>
+                                                </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
@@ -432,3 +445,35 @@
     </p-table>
 </ng-template>
 <app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>
+<p-dialog header="Review Notes" [modal]="true" [draggable]="false" [(visible)]="isNotesVisible" [style]="{ width: '50rem' }" [closable]="false" [closeOnEscape]="false">
+    <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: notes, showDelete: true } }"></ng-container>
+    <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: contract.contractNotes, showDelete: false } }"></ng-container>
+    <ng-template pTemplate="footer">
+        <p-button icon="pi pi-times" label="Close" [outlined]="true" severity="secondary" (onClick)="isNotesVisible = false" />
+        <p-button icon="pi pi-plus" label="Add" [outlined]="true" severity="secondary" (onClick)="addNote()" />
+        <p-button icon="pi pi-save" label="Apply" [outlined]="true" severity="secondary" (onClick)="applyNotes()" />
+    </ng-template>
+</p-dialog>
+<ng-template #notesTemplate let-data>
+    <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
+        <div class="col-3 mt-1">
+            <p-floatLabel>
+                <p-calendar [(ngModel)]="note.reviewDate" inputId="reviewDate" appendTo="body" [disabled]="!data.showDelete" />
+                <label for="reviewDate">Review Date</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-3 mt-1">
+            <p-floatLabel>
+                <p-dropdown inputId="inReviewEntity" [(ngModel)]="note.inReviewEntity" [options]="inReviewEntities" appendTo="body" [disabled]="!data.showDelete" />
+                <label for="inReviewEntity">In Review Entity</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-6 mt-1" [class.col-6]="!data.showDelete" [class.col-5]="data.showDelete">
+            <p-floatLabel>
+                <textarea [(ngModel)]="note.note" id="note" rows="3" cols="30" pInputTextarea class="w-full" [disabled]="!data.showDelete"> </textarea>
+                <label for="note">Comments/note</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-1 mt-1" *ngIf="data.showDelete"><p-button icon="pi pi-trash" [outlined]="true" severity="danger" (onClick)="deleteNote(idx)" /></div>
+    </div>
+</ng-template>

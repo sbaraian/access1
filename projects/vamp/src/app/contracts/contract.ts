@@ -19,6 +19,13 @@ export interface IContract {
     viking: string | Date | null;
     status: string | null;
     productChannels: IProductChannel[];
+    contractNotes: IContractNote[];
+}
+export interface IContractNote {
+    contractNoteId: number | null;
+    reviewDate: Date | string | null;
+    inReviewEntity: string | null;
+    note: number | null;
 }
 export interface IRebate {
     contractProductChannelPrefBrandRebateId: number;
@@ -89,6 +96,7 @@ export function createContract(args?: any) {
         viking: null,
         status: null,
         productChannels: [],
+        contractNotes: [],
     };
     if (args) {
         Object.assign(target, args);

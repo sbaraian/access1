@@ -1,4 +1,4 @@
-import { AsyncPipe, CommonModule } from "@angular/common";
+import { CommonModule } from "@angular/common";
 import { Component, DestroyRef, Input, OnInit, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -8,6 +8,7 @@ import { ButtonGroupModule } from "primeng/buttongroup";
 import { CalendarModule } from "primeng/calendar";
 import { CardModule } from "primeng/card";
 import { CheckboxModule } from "primeng/checkbox";
+import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from "primeng/dropdown";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { InputGroupModule } from "primeng/inputgroup";
@@ -27,7 +28,7 @@ import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog
 import { IChannel, IClient, IProduct } from "../models/client";
 import { IOption } from "../models/option";
 import { IPayor } from "../models/payor";
-import { IContract, IPrefBrands, IProductChannel, createContract, createPpa, createProductChannel, createProductChannelPrefBrand } from "./contract";
+import { IContract, IContractNote, IPrefBrands, IProductChannel, createContract, createPpa, createProductChannel, createProductChannelPrefBrand } from "./contract";
 import { ContractLengthPipe } from "./contract-length.pipe";
 import { ContractsService } from "./contracts.service";
 
@@ -39,7 +40,6 @@ export interface IProductChannelOption {
     selector: "app-contract",
     standalone: true,
     imports: [
-        AsyncPipe,
         ContractLengthPipe,
         ToastModule,
         ReactiveFormsModule,
@@ -60,6 +60,7 @@ export interface IProductChannelOption {
         CheckboxModule,
         TableModule,
         ConfirmDialogHeadless,
+        DialogModule,
     ],
     templateUrl: "./contract.component.html",
     styleUrl: "./contract.component.scss",
@@ -95,6 +96,7 @@ export class ContractComponent implements OnInit {
     accountManagers: IOption[] = [];
     prefBrandIndex = 0;
     exclusionIndex = 0;
+    isNotesVisible = false;
 
     clients: IClient[] = [];
 
@@ -141,8 +143,38 @@ export class ContractComponent implements OnInit {
             preferredType: 3,
         },
     ];
+    inReviewEntities = ["Viking", "Manufacturer", "Payer"];
     isAmendment = false;
+    notes: IContractNote[] = [];
 
+    addNote = (): void => {
+        this.notes.unshift({ contractNoteId: 0, reviewDate: null, inReviewEntity: null, note: null });
+    };
+    applyNotes = (): void => {
+        this.contract.viking = this.contract.payer = this.contract.manufacturer = null;
+        for (var i = this.notes.length - 1; i >= 0; i--) {
+            if (this.notes[i].reviewDate) {
+                switch (this.notes[i].inReviewEntity) {
+                    case "Viking":
+                        this.contract.viking = this.notes[i].reviewDate;
+                        break;
+                    case "Manufacturer":
+                        this.contract.manufacturer = this.notes[i].reviewDate;
+                        break;
+                    case "Payer":
+                        this.contract.payer = this.notes[i].reviewDate;
+                        break;
+                }
+            }
+        }
+        this.isNotesVisible = false;
+    };
+
+    deleteNote = (idx: number): void => {
+        if (idx < this.notes.length) {
+            this.notes.splice(idx, 1);
+        }
+    };
     save = () => {
         if (this.isValid()) {
             const contract = JSON.parse(JSON.stringify(this.contract));
@@ -165,6 +197,7 @@ export class ContractComponent implements OnInit {
             if (contract.contractExecuted) {
                 contract.contractExecuted = DateTime.fromISO(contract.contractExecuted).toFormat("MM/dd/yyyy");
             }
+            contract.contractNotes = this.notes.map((note) => ({ ...note, reviewDate: DateTime.fromJSDate(note.reviewDate as Date).toFormat("MM/dd/yyyy") }));
             contract.productChannels.forEach((productChannel: any) => {
                 productChannel.productId = productChannel.value.productId;
                 productChannel.channelId = productChannel.value.channelId;
@@ -174,6 +207,13 @@ export class ContractComponent implements OnInit {
                 if (productChannel.endDate) {
                     productChannel.endDate = DateTime.fromISO(productChannel.endDate).toFormat("MM/dd/yyyy");
                 }
+                if (productChannel.gpoEnterpriseFee?.toLowerCase() === "sliding scale") {
+                    productChannel.gpoEnterpriseFee = null;
+                    productChannel.isGpoEnterpriseFeeSlidingScale = true;
+                }
+                /*
+                contract.productChannels[i].gpoEnterpriseFee + "").toLowerCase() !== "sliding scale"*/
+
                 productChannel.ppas.forEach((ppa: any) => {
                     if (ppa.effectiveDate) {
                         ppa.effectiveDate = DateTime.fromISO(ppa.effectiveDate).toFormat("MM/dd/yyyy");
@@ -181,7 +221,14 @@ export class ContractComponent implements OnInit {
                     if (ppa.endDate) {
                         ppa.endDate = DateTime.fromISO(ppa.endDate).toFormat("MM/dd/yyyy");
                     }
+                    ppa["isPpCapCpi"] = (ppa.ppCap + "").toLowerCase() === "cpi";
+                    if (!ppa["isPpCapCpi"]) {
+                        delete ppa["threeYearAverage"];
+                    } else {
+                        ppa.ppCap = null;
+                    }
                 });
+
                 this.prefBrands.forEach((prefBrand) => {
                     if (!productChannel.prefBrands[prefBrand.field].isChecked) {
                         delete productChannel.prefBrands[prefBrand.field];
@@ -202,6 +249,8 @@ export class ContractComponent implements OnInit {
                 .pipe(
                     tap((contractId) => {
                         this.contract.contractId = contractId;
+                        this.contract.contractNotes = [...this.notes, ...this.contract.contractNotes];
+                        this.notes = [];
                         this.messageService.add({ severity: "success", summary: "Success", detail: `Contract ${contractId} saved.`, life: 3000 });
                     }),
                     catchError((err: any) => {
@@ -344,6 +393,20 @@ export class ContractComponent implements OnInit {
             this.messageService.add({ severity: "error", summary: "Error", detail: "Please select a Product and Channel.", life: 3000 });
             return false;
         }
+        let hasErrors = false;
+        this.notes.forEach((note: IContractNote, idx: number) => {
+            if (!note.reviewDate) {
+                this.messageService.add({ severity: "error", summary: "Error", detail: `Review Note ${idx + 1} has no date .`, life: 3000 });
+                hasErrors = true;
+            }
+            if (!note.inReviewEntity) {
+                this.messageService.add({ severity: "error", summary: "Error", detail: `Review Note ${idx + 1} has no review entity .`, life: 3000 });
+                hasErrors = true;
+            }
+        });
+        if (hasErrors) {
+            return false;
+        }
         for (var i = 0; i < this.contract.productChannels.length; i++) {
             if (!this.contract.productChannels[i].value?.productId) {
                 this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a Product and Channel on selection ${i + 1}.`, life: 3000 });
@@ -377,6 +440,7 @@ export class ContractComponent implements OnInit {
                 this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a valid Other Fee for ${this.contract.productChannels[i].value!.name}.`, life: 3000 });
                 return false;
             }
+
             var exclusions = ["exclusion", "nonExclusion"];
             var exclusionNames = ["Exclusion", "Non-Exclusion"];
             for (var j = 0; j < this.prefBrands.length; j++) {
