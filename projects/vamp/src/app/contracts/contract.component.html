@@ -10,13 +10,13 @@
                     <div class="circle-container pb-1">
                         <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
                         <div>
-                            <p-calendar [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
+                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
                         </div>
                     </div>
                     <div class="circle-container pb-1">
                         <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
                         <div>
-                            <p-calendar [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
                         </div>
                     </div>
                     <div class="circle-container" style="flex-grow: 3; gap: 0">
@@ -30,19 +30,19 @@
                             <div class="circle-container">
                                 <div class="circle" style="background-color: #59b485">Viking</div>
                                 <div>
-                                    <p-calendar [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
                                 </div>
                             </div>
                             <div class="circle-container">
                                 <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
                                 <div>
-                                    <p-calendar [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
                                 </div>
                             </div>
                             <div class="circle-container">
                                 <div class="circle" style="background-color: #00bbdd">Payer</div>
                                 <div>
-                                    <p-calendar [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
                                 </div>
                             </div>
                         </div>
@@ -50,7 +50,7 @@
                     <div class="circle-container pb-1">
                         <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
                         <div>
-                            <p-calendar [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
                         </div>
                     </div>
                 </div>
@@ -130,41 +130,43 @@
                         </div>
                     </div>
                 </ng-template>
-                <p-tabView [scrollable]="true">
+                <p-tabView [scrollable]="true" selectOnFocus="true" (onChange)="productChannelIndex = $event.index">
                     <p-tabPanel *ngFor="let productChannel of contract.productChannels; let idx = index">
                         <ng-template pTemplate="header">
-                            <p-card>
-                                <div>
-                                    <div class="flex justify-content-between align-items-center">
-                                        <div class="flex flex-column gap-2 text-center">
-                                            <div>
-                                                <label for="isCompleted">Completed</label>
+                            <div class="mb-1">
+                                <p-card [styleClass]="productChannelIndex === idx ? 'pms-630-pc' : ''">
+                                    <div>
+                                        <div class="flex justify-content-between align-items-center">
+                                            <div class="flex flex-column gap-2 text-center">
+                                                <div>
+                                                    <label for="isCompleted">Completed</label>
+                                                </div>
+                                                <div>
+                                                    <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                            <div class="text-right">
+                                                <p-button icon="pi pi-trash" severity="danger" title="Remove" (click)="removeProductChannel(idx)" />
                                             </div>
                                         </div>
-                                        <div class="text-right">
-                                            <p-button icon="pi pi-trash" severity="danger" title="Remove" (click)="removeProductChannel(idx)" />
+                                        <div class="mt-4">
+                                            <p-dropdown
+                                                appendTo="body"
+                                                placeholder="Product and Channel"
+                                                inputId="productChannelCtrl"
+                                                [(ngModel)]="productChannel.value"
+                                                [options]="productChannel.options"
+                                                optionLabel="name"
+                                                optionValue="value"
+                                                [style]="{ 'min-width': '200px' }"
+                                                (onChange)="changeProductChannel(idx)"
+                                            />
                                         </div>
                                     </div>
-                                    <div class="mt-4">
-                                        <p-dropdown
-                                            appendTo="body"
-                                            placeholder="Product and Channel"
-                                            inputId="productChannelCtrl"
-                                            [(ngModel)]="productChannel.value"
-                                            [options]="productChannel.options"
-                                            optionLabel="name"
-                                            optionValue="value"
-                                            [style]="{ 'min-width': '200px' }"
-                                            (onChange)="changeProductChannel(idx)"
-                                        />
-                                    </div>
-                                </div>
-                            </p-card>
+                                </p-card>
+                            </div>
                         </ng-template>
-                        <p-panel styleClass="third-header-no-padding" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Contract</div>
@@ -173,23 +175,15 @@
                             <div class="flex flex-row flex-wrap align-items-center mt-3 gap-2">
                                 <div>
                                     <p-floatLabel>
-                                        <p-calendar [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
                                         <label for="effectiveDate">Effective Date</label>
                                     </p-floatLabel>
                                 </div>
                                 <div>
                                     <p-floatLabel>
-                                        <p-calendar [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
                                         <label for="endDate">End Date</label>
                                     </p-floatLabel>
-                                </div>
-                                <div class="flex flex-column gap-2 text-center" style="margin-top: -35px">
-                                    <div>
-                                        <label for="autoRenew">Auto-Renew</label>
-                                    </div>
-                                    <div>
-                                        <p-triStateCheckbox inputId="autoRenew" [(ngModel)]="productChannel.autoRenew" />
-                                    </div>
                                 </div>
                                 <div class="flex flex-column gap-2 text-center" style="margin-top: -35px">
                                     <div>
@@ -197,6 +191,14 @@
                                     </div>
                                     <div>
                                         {{ productChannel.effectiveDate | contractLength: productChannel.endDate }}
+                                    </div>
+                                </div>
+                                <div class="flex flex-column gap-2 text-center" style="margin-top: -35px">
+                                    <div>
+                                        <label for="autoRenew">Auto-Renew</label>
+                                    </div>
+                                    <div>
+                                        <p-triStateCheckbox inputId="autoRenew" [(ngModel)]="productChannel.autoRenew" />
                                     </div>
                                 </div>
                             </div>
@@ -207,14 +209,14 @@
                                 </p-floatLabel>
                             </div>
                         </p-panel>
-                        <p-panel styleClass="third-header-no-padding" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Fees</div>
                                 </div>
                             </ng-template>
-                            <div class="flex flex-row justify-content-between mt-4 gap-4">
-                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                            <div class="grid justify-content-between mt-4">
+                                <div class="flex col-2 flex-column text-center p-2">
                                     <div>
                                         <label for="adminFee">Admin Fee</label>
                                     </div>
@@ -225,7 +227,7 @@
                                         <input inputId="adminFee" pInputText [(ngModel)]="productChannel.adminFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                <div class="flex col-2 flex-column text-center p-2">
                                     <div>
                                         <label for="dataPortalFee">Data/Portal Fee</label>
                                     </div>
@@ -236,7 +238,7 @@
                                         <input inputId="dataPortalFee" pInputText [(ngModel)]="productChannel.dataPortalFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                <div class="flex col-2 flex-column text-center p-2">
                                     <div>
                                         <label for="gpoEnterpriseFee">GPO/Enterprise Fee</label>
                                     </div>
@@ -247,13 +249,7 @@
                                         <input inputId="gpoEnterpriseFee" pInputText [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
                                     </p-inputGroup>
                                 </div>
-                                <div *ngIf="($any(productChannel.gpoEnterpriseFee) + '')?.toLowerCase() === 'sliding scale'">
-                                    <p-floatLabel>
-                                        <textarea [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
-                                        <label for="gpoEnterpriseFeeSlidingScale">Sliding Scale Description</label>
-                                    </p-floatLabel>
-                                </div>
-                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                <div class="flex col-2 flex-column text-center p-2">
                                     <div>
                                         <label for="otherFee">Other Fee</label>
                                     </div>
@@ -264,15 +260,21 @@
                                         <input inputId="otherFee" pInputText [(ngModel)]="productChannel.otherFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column gap-2 text-center p-0">
+                                <div class="flex col-2 flex-column text-center p-2">
                                     <div>
                                         <label for="otherFeeDescription">Other Fee Description</label>
                                     </div>
                                     <input pInputText id="otherFeeDescription" [(ngModel)]="productChannel.otherFeeDescription" />
                                 </div>
+                                <div *ngIf="($any(productChannel.gpoEnterpriseFee) + '')?.toLowerCase() === 'sliding scale'" class="flex col-offset-5 col-5 flex-column text-center p-2 mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                        <label for="gpoEnterpriseFeeSlidingScale">Sliding Scale Description</label>
+                                    </p-floatLabel>
+                                </div>
                             </div>
                         </p-panel>
-                        <p-panel styleClass="third-header-no-padding" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Rebates</div>
@@ -280,7 +282,7 @@
                             </ng-template>
 
                             <div class="flex">
-                                <div *ngFor="let prefBrand of prefBrands; let idx2 = index" class="flex-1 border-solid border-1 border-round-top-lg" [class]="{ 'bg-green-100': prefBrandIndex === idx2, 'border-left-none': idx2 > 0 }" (click)="selectPrefBrand(idx2)">
+                                <div *ngFor="let prefBrand of prefBrands; let idx2 = index" class="flex-1 border-solid border-1 border-round-top-lg" [class]="{ 'pms-630-pc': prefBrandIndex === idx2, 'border-left-none': idx2 > 0 }" (click)="selectPrefBrand(idx2)">
                                     <div class="flex justify-content-between gap-4 align-items-center p-2">
                                         <div class="flex flex-column gap-2 text-center">
                                             <div style="white-space: nowrap">{{ prefBrand.title }}</div>
@@ -302,14 +304,11 @@
                                             *ngFor="let exclusion of exclusions; let idx3 = index"
                                             (click)="exclusionIndex = idx2 * 4 + idx3"
                                             class="flex-1 border-solid border-1 border-round-top-lg border-left-none border-bottom-none"
-                                            [class]="{ 'bg-green-200': exclusionIndex === idx2 * 4 + idx3, 'border-right-none': idx3 > 0 }"
+                                            [class]="{ 'pms-315-pc': exclusionIndex === idx2 * 4 + idx3, 'border-right-none': idx3 > 0 }"
                                         >
                                             <div class="flex justify-content-between gap-4 align-items-center p-2">
                                                 <div class="flex flex-column gap-2 text-center w-full">
                                                     <div style="white-space: nowrap">{{ exclusion.title }}</div>
-                                                    <div>
-                                                        <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]![exclusion.field].isChecked" [binary]="true" />
-                                                    </div>
                                                     <div>
                                                         <p-button label="Duplicate" icon="pi pi-clone" [iconPos]="idx3 === 0 ? 'right' : 'left'" (click)="duplicate(productChannel.prefBrands[prefBrand.field], idx3)" />
                                                     </div>
@@ -334,7 +333,7 @@
                                 </div>
                             </div>
                         </p-panel>
-                        <p-panel styleClass="third-header-no-padding" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Price Protection Agreement (PP)</div>
@@ -343,16 +342,10 @@
 
                             <div class="flex flex-column pt-4">
                                 <div>
-                                    <p-floatLabel>
-                                        <p-calendar [(ngModel)]="productChannel.wacEffectiveDate" inputId="wacEffectiveDate" />
-                                        <label for="wacEffectiveDate">WAC Effective Date</label>
-                                    </p-floatLabel>
-                                </div>
-                                <div>
                                     <p-table [value]="productChannel.ppas" styleClass="p-datatable-striped">
                                         <ng-template pTemplate="header">
                                             <tr>
-                                                <th class="w-2">Effective Date</th>
+                                                <th class="w-2">Baseline WAC Effective Date</th>
                                                 <th class="w-2">End Date</th>
                                                 <th class="w-2">Cap</th>
                                                 <th>Cap Description</th>
@@ -364,10 +357,10 @@
                                         <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
                                             <tr>
                                                 <td>
-                                                    <p-calendar appendTo="body" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
                                                 </td>
                                                 <td>
-                                                    <p-calendar appendTo="body" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
                                                 </td>
                                                 <td>
                                                     <p-inputGroup>
@@ -458,7 +451,7 @@
     <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
         <div class="col-3 mt-1">
             <p-floatLabel>
-                <p-calendar [(ngModel)]="note.reviewDate" inputId="reviewDate" appendTo="body" [disabled]="!data.showDelete" />
+                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
                 <label for="reviewDate">Review Date</label>
             </p-floatLabel>
         </div>

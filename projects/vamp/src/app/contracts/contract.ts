@@ -64,6 +64,7 @@ export interface IProductChannel {
     channelId: number | null;
     effectiveDate: string | Date | null;
     endDate: string | Date | null;
+    renewDate: string | Date | null;
     autoRenew: boolean;
     description: string | null;
     isMedical: boolean;
@@ -113,6 +114,7 @@ export function createProductChannel(args?: any) {
         channelId: null,
         effectiveDate: null,
         endDate: null,
+        renewDate: null,
         autoRenew: false,
         description: null,
         isMedical: false,
@@ -161,14 +163,10 @@ export function createProductChannelPrefBrand(args?: any) {
     if (args) {
         Object.assign(target, args);
     }
-    if (target.exclusion?.rebates?.length) {
-        target.exclusion.isChecked = true;
-    } else {
+    if (!target.exclusion?.rebates?.length) {
         target.exclusion = { isChecked: false, rebates: [] };
     }
-    if (target.nonExclusion?.rebates?.length) {
-        target.nonExclusion.isChecked = true;
-    } else {
+    if (!target.nonExclusion?.rebates?.length) {
         target.nonExclusion = { isChecked: false, rebates: [] };
     }
     return target;

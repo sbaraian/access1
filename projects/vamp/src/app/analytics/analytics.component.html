@@ -198,7 +198,7 @@
                     </div>
                 </div>
             </div>
-            <p-panel styleClass="mt-3 third-header-no-padding" *ngIf="analyticIndex >= 0 && (isReadWrite || !!analytics[analyticIndex].analyticIndications?.length)">
+            <p-panel styleClass="mt-3 pms-315-pc" *ngIf="analyticIndex >= 0 && (isReadWrite || !!analytics[analyticIndex].analyticIndications?.length)">
                 <ng-template pTemplate="header">
                     <div class="flex flex-row flex-wrap justify-content-between w-full">
                         <div class="flex align-items-center justify-content-start font-bold">
@@ -210,8 +210,8 @@
                             </div>
                             <div>
                                 <p-buttonGroup>
-                                    <p-button icon="pi pi-plus" severity="success" title="Add New" (click)="addAnalyticIndication()" *ngIf="isReadWrite" />
-                                    <p-button icon="pi pi-trash" severity="success" title="Delete" (click)="deleteAnalyticIndication()" *ngIf="isReadWrite" />
+                                    <p-button icon="pi pi-plus" severity="success" title="Add New" (click)="addAnalyticIndication()" *ngIf="isReadWrite" styleClass="pms-315-pc" />
+                                    <p-button icon="pi pi-trash" severity="success" title="Delete" (click)="deleteAnalyticIndication()" *ngIf="isReadWrite" styleClass="pms-315-pc" />
                                 </p-buttonGroup>
                             </div>
                         </div>
@@ -758,7 +758,7 @@
                     </div>
                 </div>
             </div>
-            <p-panel styleClass="mt-3 third-header-no-padding" *ngFor="let analyticIndication of analytic.analyticIndications; let indicationIndex2 = index">
+            <p-panel styleClass="mt-3 pms-315-pc" *ngFor="let analyticIndication of analytic.analyticIndications; let indicationIndex2 = index">
                 <ng-template pTemplate="header">
                     <div class="flex flex-row flex-wrap justify-content-between w-full">
                         <div class="flex align-items-center justify-content-start font-bold">

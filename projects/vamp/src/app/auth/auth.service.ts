@@ -10,6 +10,8 @@ import { utils } from "../utils";
 })
 export class AuthService {
     private currentUserSubject$: BehaviorSubject<User | null>;
+    private static _showLogin$ = new BehaviorSubject<boolean>(false);
+    public static showLogin = AuthService._showLogin$.asObservable();
     public currentUser$: Observable<any>;
     private readWriteUsers = ["sbaraian@hotmail.com", "bragan@access1.biz", "ajacques@vshealthgroup.com", "sdash@vshealthgroup.com", "cszelong@vshealthgroup.com", "adabrosca@vshealthgroup.com"];
 
@@ -19,6 +21,10 @@ export class AuthService {
         this.currentUserSubject$ = new BehaviorSubject<User | null>(utils.tryParseJSON(localStorage.getItem("currentUser")));
         this.currentUser$ = this.currentUserSubject$.asObservable();
     }
+
+    public setAuthenticated = (isAuthenticated: boolean): void => {
+        AuthService._showLogin$.next(!isAuthenticated);
+    };
 
     public get currentUserValue(): User | null {
         return this.currentUserSubject$?.value;
@@ -43,6 +49,7 @@ export class AuthService {
                     const user = { name: data.name, email: data.email, isReadWrite: this.readWriteUsers.includes(data.email.toLowerCase()) };
                     localStorage.setItem("currentUser", JSON.stringify(user));
                     this.currentUserSubject$.next(user);
+                    this.setAuthenticated(true);
                 }),
             );
     }
@@ -53,6 +60,7 @@ export class AuthService {
                 const user = { name: data.name, email: data.email, isReadWrite: this.readWriteUsers.includes(data.email.toLowerCase()) };
                 localStorage.setItem("currentUser", JSON.stringify(user));
                 this.currentUserSubject$.next(user);
+                this.setAuthenticated(true);
                 return true;
             }),
             catchError(() => of(false)),
@@ -64,6 +72,7 @@ export class AuthService {
             finalize(() => {
                 localStorage.removeItem("currentUser");
                 this.currentUserSubject$.next(null);
+                this.setAuthenticated(false);
             }),
         );
     }

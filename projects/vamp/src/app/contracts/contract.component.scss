@@ -23,8 +23,13 @@
     justify-content: flex-end;
     gap: 10px;
 }
+
 :host ::ng-deep {
     .p-calendar .p-inputtext  {
         text-align: center;
       }
+          p-calendar > span > div.p-datepicker { display: none!important; }
 }
+// :host ::ng-deep .p-card.green{
+//     background-color: red;
+// }

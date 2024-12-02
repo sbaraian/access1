@@ -99,7 +99,6 @@ export class AnalyticsComponent implements OnInit {
     paginatorFirstIndication = 0;
     acceptLabel = "Delete";
     rejectLabel = "Cancel";
-    confirmValue = 0;
     isNewVisible = false;
     headerNew = "";
     newItemType = 0;
@@ -271,7 +270,6 @@ export class AnalyticsComponent implements OnInit {
             };
 
             if (!!this.analytics[this.analyticIndex].analyticId) {
-                this.confirmValue = 0;
                 this.confirmationService.confirm({
                     header: "Are you sure?",
                     message: "Please confirm to proceed.",
@@ -297,15 +295,6 @@ export class AnalyticsComponent implements OnInit {
             }
         }
     };
-
-    onHide(ev: number) {
-        if (ev === 0) {
-            switch (this.confirmValue) {
-                case 1:
-                    break;
-            }
-        }
-    }
 
     deleteAnalyticIndication = (): void => {
         if (this.indicationIndex >= 0 && this.indicationIndex < this.analytics[this.analyticIndex].analyticIndications.length) {

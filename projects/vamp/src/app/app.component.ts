@@ -7,18 +7,21 @@ import { MenuItem } from "primeng/api";
 import { AvatarModule } from "primeng/avatar";
 import { BadgeModule } from "primeng/badge";
 import { ButtonModule } from "primeng/button";
+import { DialogService, DynamicDialogRef } from "primeng/dynamicdialog";
 import { MenubarModule } from "primeng/menubar";
 import { RippleModule } from "primeng/ripple";
 import { ToastModule } from "primeng/toast";
+
 import { filter, switchMap, tap } from "rxjs/operators";
 import { AuthService } from "./auth/auth.service";
+import { LoginComponent } from "./auth/login.component";
 import { BodyStyleService } from "./body-style.service";
 
 @Component({
     selector: "app-root",
     standalone: true,
     imports: [RouterOutlet, MenubarModule, BadgeModule, AvatarModule, RippleModule, CommonModule, ButtonModule, ToastModule, NgHttpLoaderModule],
-    providers: [AuthService],
+    providers: [AuthService, DialogService],
     templateUrl: "./app.component.html",
     styleUrl: "./app.component.scss",
 })
@@ -29,6 +32,8 @@ export class AppComponent implements OnInit {
     public authService = inject(AuthService);
     private destroyRef = inject(DestroyRef);
     private bodyStyleService = inject(BodyStyleService);
+    public dialogService = inject(DialogService);
+    ref: DynamicDialogRef | undefined;
     isAuthenticated = false;
 
     public currentUser$ = this.authService.currentUser$
@@ -70,6 +75,23 @@ export class AppComponent implements OnInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
+        AuthService.showLogin
+            .pipe(
+                tap((showDialog) => {
+                    if (showDialog) {
+                        if (!this.ref) {
+                            this.ref = this.dialogService.open(LoginComponent, { header: "Login", width: "20vw", modal: true, closeOnEscape: false, closable: false });
+                        }
+                    } else {
+                        if (this.ref) {
+                            this.ref.close();
+                            this.ref = undefined;
+                        }
+                    }
+                }),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe();
         this.items = [
             /*{
                 label: "Client Activity",
@@ -78,7 +100,7 @@ export class AppComponent implements OnInit {
                         icon: "pi pi-file-plus",
                         label: "New",
                         route: "/clientActivity/0",
-                    },
+                    },+
                     {
                         icon: "pi pi-search",
                         label: "Search",
@@ -109,6 +131,11 @@ export class AppComponent implements OnInit {
                 label: "Reports",
                 items: [],
             },*/
+            {
+                icon: "pi pi-book",
+                label: "Payor View",
+                route: "/payorView",
+            },
             {
                 label: "Contracting",
                 items: [

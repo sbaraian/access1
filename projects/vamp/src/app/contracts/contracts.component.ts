@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { DateTime } from "luxon";
 import { ButtonModule } from "primeng/button";
 import { ButtonGroupModule } from "primeng/buttongroup";
+import { CalendarModule } from "primeng/calendar";
 import { DropdownModule } from "primeng/dropdown";
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from "primeng/dynamicdialog";
 import { FloatLabelModule } from "primeng/floatlabel";
@@ -20,7 +21,8 @@ import { tap } from "rxjs/operators";
 import { AppService } from "../app.service";
 import { IClient } from "../models/client";
 import { IColumn, IOption } from "../models/option";
-import { IPayor } from "../models/payor";
+import { IPayor, createPayor } from "../models/payor";
+import { PayorService } from "../payor-view/payor.service";
 import { IContract } from "./contract";
 import { ContractComponent } from "./contract.component";
 import { ContractsService } from "./contracts.service";
@@ -28,13 +30,14 @@ import { ContractsService } from "./contracts.service";
 @Component({
     selector: "app-contracts",
     standalone: true,
-    imports: [ButtonModule, ButtonGroupModule, FloatLabelModule, DropdownModule, PanelModule, ToastModule, ReactiveFormsModule, CommonModule, TableModule, MultiSelectModule, OverlayPanelModule, DynamicDialogModule],
+    imports: [ButtonModule, ButtonGroupModule, CalendarModule, FloatLabelModule, DropdownModule, PanelModule, ToastModule, ReactiveFormsModule, CommonModule, TableModule, MultiSelectModule, OverlayPanelModule, DynamicDialogModule],
     templateUrl: "./contracts.component.html",
     styleUrl: "./contracts.component.scss",
     providers: [DialogService],
 })
 export class ContractsComponent implements OnInit {
     private appService = inject(AppService);
+    private payorService = inject(PayorService);
     private contractsService = inject(ContractsService);
     private router = inject(Router);
     private destroyRef = inject(DestroyRef);
@@ -144,17 +147,16 @@ export class ContractsComponent implements OnInit {
             .getTherapeuticCategories()
             .pipe(
                 tap((data) => {
-                    data.unshift({ id: 0, name: "all" });
-                    this.therapeuticAreas = data;
+                    this.therapeuticAreas = [{ id: 0, name: "all" }, ...data.map((item) => ({ id: item.therapeuticCategoryId, name: item.name }))];
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        this.appService
+        this.payorService
             .getPayors()
             .pipe(
                 tap((data) => {
-                    data.unshift({ payorId: 0, name: "all" });
+                    data.unshift(createPayor({ payorId: 0, name: "all" }));
                     this.payors = data;
                 }),
                 takeUntilDestroyed(this.destroyRef),

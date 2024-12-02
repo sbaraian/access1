@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { IClient } from "./models/client";
 import { IOption } from "./models/option";
-import { IPayor } from "./models/payor";
+import { ITherapeuticCategory } from "./models/payor";
 import { OptionsSerializer } from "./options-serializer";
 
 @Injectable({
@@ -21,15 +21,12 @@ export class AppService {
             }),
         );
     };
-    getTherapeuticCategories = () => this.getOptions("therapeuticCategoryId", "api/TherapeuticCategory/getTherapeuticCategories");
+    getTherapeuticCategories = (): Observable<ITherapeuticCategory[]> => this.http.get<ITherapeuticCategory[]>("api/therapeuticCategory/getTherapeuticCategories");
     getClients = (): Observable<IClient[]> => {
-        return this.http.get<IClient[]>("api/Clients/getClients?isActive=true&isProspect=false");
+        return this.http.get<IClient[]>("api/clients/getClients?isActive=true&isProspect=false");
     };
-    getPayors = (): Observable<IPayor[]> => {
-        return this.http.get<IPayor[]>("api/Payors/getPayors?isActive=true");
-    };
-    getAccountManagers = () => this.getOptions("accountManagerId", "api/AccountManagers/GetAccountManagers");
+    getAccountManagers = () => this.getOptions("accountManagerId", "api/accountManagers/getAccountManagers");
     getCurrentAccountManager = (): Observable<{ accountManagerId: string; name: string }> => {
-        return this.http.get<{ accountManagerId: string; name: string }>("api/AccountManagers/GetCurrentAccountManager");
+        return this.http.get<{ accountManagerId: string; name: string }>("api/accountManagers/getCurrentAccountManager");
     };
 }

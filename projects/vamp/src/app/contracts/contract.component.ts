@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { DateTime } from "luxon";
 import { ConfirmationService, MessageService } from "primeng/api";
+import { ButtonModule } from "primeng/button";
 import { ButtonGroupModule } from "primeng/buttongroup";
 import { CalendarModule } from "primeng/calendar";
 import { CardModule } from "primeng/card";
@@ -22,12 +23,12 @@ import { ToastModule } from "primeng/toast";
 import { TriStateCheckboxModule } from "primeng/tristatecheckbox";
 import { BehaviorSubject, EMPTY, catchError, combineLatest, of } from "rxjs";
 import { distinctUntilChanged, switchMap, tap } from "rxjs/operators";
-
 import { AppService } from "../app.service";
 import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
 import { IChannel, IClient, IProduct } from "../models/client";
 import { IOption } from "../models/option";
 import { IPayor } from "../models/payor";
+import { PayorService } from "../payor-view/payor.service";
 import { IContract, IContractNote, IPrefBrands, IProductChannel, createContract, createPpa, createProductChannel, createProductChannelPrefBrand } from "./contract";
 import { ContractLengthPipe } from "./contract-length.pipe";
 import { ContractsService } from "./contracts.service";
@@ -40,27 +41,28 @@ export interface IProductChannelOption {
     selector: "app-contract",
     standalone: true,
     imports: [
-        ContractLengthPipe,
-        ToastModule,
-        ReactiveFormsModule,
-        FloatLabelModule,
-        DropdownModule,
-        PanelModule,
-        CardModule,
-        CommonModule,
-        CalendarModule,
         ButtonGroupModule,
-        InputTextareaModule,
-        TabViewModule,
-        TriStateCheckboxModule,
-        FormsModule,
-        InputGroupModule,
-        InputGroupAddonModule,
-        InputTextModule,
+        ButtonModule,
+        CalendarModule,
+        CardModule,
         CheckboxModule,
-        TableModule,
+        CommonModule,
         ConfirmDialogHeadless,
+        ContractLengthPipe,
         DialogModule,
+        DropdownModule,
+        FloatLabelModule,
+        FormsModule,
+        InputGroupAddonModule,
+        InputGroupModule,
+        InputTextareaModule,
+        InputTextModule,
+        PanelModule,
+        ReactiveFormsModule,
+        TableModule,
+        TabViewModule,
+        ToastModule,
+        TriStateCheckboxModule,
     ],
     templateUrl: "./contract.component.html",
     styleUrl: "./contract.component.scss",
@@ -68,6 +70,7 @@ export interface IProductChannelOption {
 })
 export class ContractComponent implements OnInit {
     private appService = inject(AppService);
+    private payorService = inject(PayorService);
     private contractsService = inject(ContractsService);
     private destroyRef = inject(DestroyRef);
     private messageService = inject(MessageService);
@@ -96,6 +99,7 @@ export class ContractComponent implements OnInit {
     accountManagers: IOption[] = [];
     prefBrandIndex = 0;
     exclusionIndex = 0;
+    productChannelIndex = 0;
     isNotesVisible = false;
 
     clients: IClient[] = [];
@@ -207,7 +211,7 @@ export class ContractComponent implements OnInit {
                 if (productChannel.endDate) {
                     productChannel.endDate = DateTime.fromISO(productChannel.endDate).toFormat("MM/dd/yyyy");
                 }
-                if (productChannel.gpoEnterpriseFee?.toLowerCase() === "sliding scale") {
+                if ((productChannel.gpoEnterpriseFee + "").toLowerCase() === "sliding scale") {
                     productChannel.gpoEnterpriseFee = null;
                     productChannel.isGpoEnterpriseFeeSlidingScale = true;
                 }
@@ -232,12 +236,6 @@ export class ContractComponent implements OnInit {
                 this.prefBrands.forEach((prefBrand) => {
                     if (!productChannel.prefBrands[prefBrand.field].isChecked) {
                         delete productChannel.prefBrands[prefBrand.field];
-                    } else {
-                        this.exclusions.forEach((exclusion) => {
-                            if (!productChannel.prefBrands[prefBrand.field][exclusion.field].isChecked) {
-                                delete productChannel.prefBrands[prefBrand.field][exclusion.field];
-                            }
-                        });
                     }
                 });
             });
@@ -446,17 +444,15 @@ export class ContractComponent implements OnInit {
             for (var j = 0; j < this.prefBrands.length; j++) {
                 if (this.contract.productChannels[i].prefBrands[this.prefBrands[j].field]?.isChecked) {
                     for (var l = 0; l < exclusions.length; l++) {
-                        if (this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]]?.isChecked) {
-                            for (var k = 0; k < this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates.length; k++) {
-                                if (!this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates[k].rebate) {
-                                    this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a Rebate for ${this.contract.productChannels[i].value!.name} ${exclusionNames[l]} rebate row ${k + 1}.`, life: 3000 });
-                                    return false;
-                                }
-                                var rebatePercentage = Number.parseFloat(this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates[k].rebatePercentage);
-                                if (isNaN(rebatePercentage) || rebatePercentage < 0 || rebatePercentage > 100) {
-                                    this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a valid Rebate Percentage for ${this.contract.productChannels[i].value!.name} ${exclusionNames[l]} rebate row ${k + 1}.`, life: 3000 });
-                                    return false;
-                                }
+                        for (var k = 0; k < this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates.length; k++) {
+                            if (!this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates[k].rebate) {
+                                this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a Rebate for ${this.contract.productChannels[i].value!.name} ${exclusionNames[l]} rebate row ${k + 1}.`, life: 3000 });
+                                return false;
+                            }
+                            var rebatePercentage = Number.parseFloat(this.contract.productChannels[i].prefBrands[this.prefBrands[j].field][exclusions[l]].rebates[k].rebatePercentage);
+                            if (isNaN(rebatePercentage) || rebatePercentage < 0 || rebatePercentage > 100) {
+                                this.messageService.add({ severity: "error", summary: "Error", detail: `Please select a valid Rebate Percentage for ${this.contract.productChannels[i].value!.name} ${exclusionNames[l]} rebate row ${k + 1}.`, life: 3000 });
+                                return false;
                             }
                         }
                     }
@@ -523,7 +519,7 @@ export class ContractComponent implements OnInit {
                 }),
             ),
             clients: this.appService.getClients(),
-            payors: this.appService.getPayors(),
+            payors: this.payorService.getPayors(),
             accountManagers: this.appService.getAccountManagers(),
             currentAccountManager: this.appService.getCurrentAccountManager(),
         })

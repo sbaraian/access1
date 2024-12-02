@@ -1,0 +1,49 @@
+<p-toast position="bottom-right" />
+<p-card>
+    <div class="field grid mt-3">
+        <label for="firstName" style="width: 100px" class="font-semibold">First Name</label>
+        <div class="col-12 md:col-10">
+            <input id="firstName" type="text" pInputText class="w-full" [(ngModel)]="contact!.firstName" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="lastName" style="width: 100px" class="font-semibold">Last Name</label>
+        <div class="col-12 md:col-10">
+            <input id="lastName" type="text" pInputText class="w-full" [(ngModel)]="contact!.lastName" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="title" style="width: 100px" class="font-semibold">Title</label>
+        <div class="col-12 md:col-10">
+            <input id="title" type="text" pInputText class="w-full" [(ngModel)]="contact!.title" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="jobFunction" style="width: 100px" class="font-semibold">Job Function</label>
+        <div class="col-12 md:col-10">
+            <input id="jobFunction" type="text" pInputText class="w-full" [(ngModel)]="contact!.jobFunction" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="email" style="width: 100px" class="font-semibold">Email</label>
+        <div class="col-12 md:col-10">
+            <input id="email" type="text" pInputText class="w-full" [(ngModel)]="contact!.email" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="cellPhone" style="width: 100px" class="font-semibold">Cell Phone</label>
+        <div class="col-12 md:col-10">
+            <p-inputMask inputId="cellPhone" mask="(999) 999-9999" class="w-full" [(ngModel)]="contact!.cellPhone" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="officePhone" style="width: 100px" class="font-semibold">Office Phone</label>
+        <div class="col-12 md:col-10">
+            <p-inputMask inputId="officePhone" mask="(999) 999-9999" class="w-full" [(ngModel)]="contact!.officePhone" />
+        </div>
+    </div>
+    <p-divider />
+    <div class="text-right">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (click)="save()" />
+    </div>
+</p-card>

@@ -1,0 +1,644 @@
+<div>
+    <div>
+        <p-panel [toggleable]="true" styleClass="primary-header">
+            <ng-template pTemplate="header">
+                <div class="font-bold">Payor View</div>
+            </ng-template>
+            <div class="mt-3 flex justify-content-between flex-wrap mb-2">
+                <div>
+                    <p-floatLabel>
+                        <p-dropdown inputId="payorCtrl" [formControl]="payorCtrl" [options]="payors" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="payorId" />
+                        <label for="payorCtrl">Payors</label>
+                    </p-floatLabel>
+                </div>
+                <div *ngIf="!!payor?.payorId">
+                    <p-buttonGroup>
+                        <p-button icon="pi pi-pen-to-square" severity="secondary" title="Edit" (click)="edit()" [disabled]="corporateDetailsEnabled" />
+                        <p-button icon="pi pi-times" severity="secondary" title="Cancel" (click)="cancel()" [disabled]="!corporateDetailsEnabled" />
+                        <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" [disabled]="!corporateDetailsEnabled" />
+                    </p-buttonGroup>
+                </div>
+            </div>
+            <p-accordion [activeIndex]="0" *ngIf="!!payor">
+                <p-accordionTab header="Corporate Details">
+                    <div class="mt-2 flex flex-row flex-wrap align-items-center">
+                        <div class="w-4 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="nameCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.name" class="w-full" />
+                                <label for="nameCd">Name</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="akaCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.akaName" class="w-full" />
+                                <label for="akaCd">AKA</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="pbmCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.pbm" class="w-full" />
+                                <label for="pbmCd">PBM</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-4 p-2">
+                            <p-inputGroup styleClass="w-full">
+                                <p-floatLabel>
+                                    <p-dropdown
+                                        inputId="websiteCd"
+                                        [options]="payor.payorWebsites"
+                                        optionLabel="name"
+                                        optionValue="payorWebsiteId"
+                                        [(ngModel)]="payor.payorWebsiteId"
+                                        styleClass="w-full"
+                                        [disabled]="!corporateDetailsEnabled"
+                                        dataKey="payorWebsiteId"
+                                        [style]="{ 'min-width': '200px' }"
+                                        class="w-full"
+                                    />
+                                    <label for="websiteCd">Website</label>
+                                </p-floatLabel>
+                                <button type="button" pButton icon="pi pi-plus" (click)="isWebsiteVisible = true"></button>
+                            </p-inputGroup>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-row flex-wrap align-items-center">
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="address1Cd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.address1" class="w-full" />
+                                <label for="address1Cd">Address 1</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="address2Cd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.address2" class="w-full" />
+                                <label for="address2Cd">Address 2</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="cityCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.city" class="w-full" />
+                                <label for="cityCd">City</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="stateCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.state" class="w-full" />
+                                <label for="stateCd">State</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="zipCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.zip" class="w-full" />
+                                <label for="zipCd">Zip</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-row flex-wrap align-items-center">
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <p-inputMask inputId="contractPhoneCd" mask="(999) 999-9999" [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.payorAddress.phone" styleClass="w-full" />
+                                <label for="contractPhoneCd">Contract Phone</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="typeCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.type" class="w-full" />
+                                <label for="typeCd">Type</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="accountManagerCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.accountManager" class="w-full" />
+                                <label for="accountManagerCd">Account Manager</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <input type="text" inputId="secondAccountManagerCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.secondAccountManager" class="w-full" />
+                                <label for="secondAccountManagerCd">Second Account Manager</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="w-2 p-2">
+                            <p-floatLabel>
+                                <p-inputNumber inputId="totalLivesCd" [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.totalLives" inputStyleClass="w-full" />
+                                <label for="totalLivesCd">Total Lives</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-row flex-wrap align-items-center">
+                        <div class="w-2 p-2 text-center">
+                            <div><label>Contract</label></div>
+                            <div><p-checkbox [(ngModel)]="payor.hasContract" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                        </div>
+                        <div class="w-10 p-2 border-round-lg border-1 text-center">
+                            <div>Type</div>
+                            <p-divider />
+                            <div class="grid">
+                                <div class="col p-2 text-center">
+                                    <div><label>PBM</label></div>
+                                    <div><p-checkbox [(ngModel)]="payor.isPbm" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                                </div>
+                                <div class="col p-2 text-center">
+                                    <div><label>MCO</label></div>
+                                    <div><p-checkbox [(ngModel)]="payor.isMco" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                                </div>
+                                <div class="col p-2 text-center">
+                                    <div><label>Med D</label></div>
+                                    <div><p-checkbox [(ngModel)]="payor.isMedD" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                                </div>
+                                <div class="col p-2 text-center">
+                                    <div><label>Medicaid FFS</label></div>
+                                    <div><p-checkbox [(ngModel)]="payor.isMedFfs" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                                </div>
+                                <div class="col p-2 text-center">
+                                    <div><label>Medicaid Management</label></div>
+                                    <div><p-checkbox [(ngModel)]="payor.isMedManaged" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" /></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p-tabView>
+                        <p-tabPanel>
+                            <ng-template pTemplate="header"> <div class="mb-2">90 day action plan</div></ng-template>
+                            <div class="card">
+                                <p-table
+                                    [value]="payorActionPlans"
+                                    [columns]="colsActionPlans"
+                                    styleClass="p-datatable-striped"
+                                    [tableStyle]="{ 'min-width': '50rem' }"
+                                    [scrollable]="true"
+                                    scrollHeight="flex"
+                                    [sortOrder]="-1"
+                                    selectionMode="single"
+                                    dataKey="payorActionPlanId"
+                                    [rowsPerPageOptions]="[5, 10, 50]"
+                                    [paginator]="true"
+                                    [rows]="5"
+                                    editMode="row"
+                                >
+                                    <ng-template pTemplate="header" let-columns>
+                                        <tr>
+                                            <th></th>
+                                            <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}">{{ col.header }}<p-sortIcon field="{{ col.field }}" *ngIf="!!col.field" /></th>
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="body" let-row let-editing="editing" let-ri="rowIndex" let-columns="columns">
+                                        <tr [pEditableRow]="row">
+                                            <td>
+                                                <div class="flex align-items-center justify-content-center gap-2" *ngIf="corporateDetailsEnabled">
+                                                    <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInitActionPlans(row)" class="p-button-rounded p-button-text"></button>
+                                                    <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSaveActionPlans(row)" class="p-button-rounded p-button-text p-button-success mr-2"></button>
+                                                    <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancelActionPlans(row, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
+                                                </div>
+                                            </td>
+                                            <td *ngFor="let col of columns" [ngSwitch]="col.field">
+                                                <div *ngSwitchCase="'name'">{{ row[col.field] }}</div>
+                                                <div *ngSwitchCase="''">
+                                                    <p-button icon="pi pi-arrow-left" (click)="copyActionPlan(ri)" [disabled]="!corporateDetailsEnabled" />
+                                                </div>
+                                                <p-cellEditor *ngSwitchDefault>
+                                                    <ng-template pTemplate="input">
+                                                        <input pInputText type="text" [(ngModel)]="row[col.field]" />
+                                                    </ng-template>
+                                                    <ng-template pTemplate="output">
+                                                        {{ row[col.field] }}
+                                                    </ng-template>
+                                                </p-cellEditor>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </p-tabPanel>
+                        <p-tabPanel>
+                            <ng-template pTemplate="header"> <div class="mb-2">Account Overview</div></ng-template>
+                            <div class="card">
+                                <div class="mt-4">
+                                    <textarea [(ngModel)]="payor.description" id="descriptionCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                </div>
+                            </div>
+                        </p-tabPanel>
+                        <p-tabPanel>
+                            <ng-template pTemplate="header"> <div class="mb-2">Commercial</div></ng-template>
+                            <div class="card mt-2 pt-2">
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Predominant Benefit Design</div>
+                                    <div class="col-2 align-content-center">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="payor.commercialOpen" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                            <label for="openCd">Open</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div class="col-2 align-content-center">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="payor.commercialClosed" id="closedCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                            <label for="closedCd">Closed</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div class="col p-2 border-round-lg border-1 text-center">
+                                        <div>CoPays</div>
+                                        <p-divider />
+                                        <div class="grid pt-2">
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.commercialCopay1" id="copay1Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay1Cd">Copay 1</label>
+                                                </p-floatLabel>
+                                            </div>
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.commercialCopay2" id="copay2Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay2Cd">Copay 2</label>
+                                                </p-floatLabel>
+                                            </div>
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.commercialCopay3" id="copay3Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay3Cd">Copay 3</label>
+                                                </p-floatLabel>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Standard New Drug Policy</div>
+                                    <div class="col align-content-center">
+                                        <textarea [(ngModel)]="payor.commercialPolicy" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Standard Number of Months Post Launch to Acquire Coverage</div>
+                                    <div class="col align-content-center">
+                                        <input type="text" inputId="typeCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.commercialMonths" class="w-full" />
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Comment</div>
+                                    <div class="col align-content-center">
+                                        <textarea [(ngModel)]="payor.commercialComment" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-tabPanel>
+                        <p-tabPanel>
+                            <ng-template pTemplate="header"> <div class="mb-2">Medicare</div></ng-template>
+                            <div class="card mt-2 pt-2">
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Predominant Benefit Design</div>
+                                    <div class="col-2 align-content-center">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="payor.medicareOpen" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                            <label for="openCd">Open</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div class="col-2 align-content-center">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="payor.medicareClosed" id="closedCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                            <label for="closedCd">Closed</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div class="col p-2 border-round-lg border-1 text-center">
+                                        <div>CoPays</div>
+                                        <p-divider />
+                                        <div class="grid pt-2">
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.medicareCopay1" id="copay1Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay1Cd">Copay 1</label>
+                                                </p-floatLabel>
+                                            </div>
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.medicareCopay2" id="copay2Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay2Cd">Copay 2</label>
+                                                </p-floatLabel>
+                                            </div>
+                                            <div class="col">
+                                                <p-floatLabel>
+                                                    <textarea [(ngModel)]="payor.medicareCopay3" id="copay3Cd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                                    <label for="copay3Cd">Copay 3</label>
+                                                </p-floatLabel>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Standard New Drug Policy</div>
+                                    <div class="col align-content-center">
+                                        <textarea [(ngModel)]="payor.medicarePolicy" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Standard Number of Months Post Launch to Acquire Coverage</div>
+                                    <div class="col align-content-center">
+                                        <input type="text" inputId="typeCd" pInputText [disabled]="!corporateDetailsEnabled" [(ngModel)]="payor.medicareMonths" class="w-full" />
+                                    </div>
+                                </div>
+                                <div class="grid">
+                                    <div class="col-2 align-content-center">Comment</div>
+                                    <div class="col align-content-center">
+                                        <textarea [(ngModel)]="payor.medicareComment" id="openCd" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-tabPanel>
+                        <p-tabPanel>
+                            <ng-template pTemplate="header"> <div class="mb-2">Contract Tracking</div></ng-template>
+                            <div class="card">
+                                <p-table
+                                    [value]="payorContractTrackings"
+                                    [columns]="colsContractTracking"
+                                    styleClass="p-datatable-striped"
+                                    [tableStyle]="{ 'min-width': '50rem' }"
+                                    [scrollable]="true"
+                                    scrollHeight="flex"
+                                    [sortOrder]="-1"
+                                    selectionMode="single"
+                                    dataKey="payorContractTrackingId"
+                                    [rowsPerPageOptions]="[5, 10, 50]"
+                                    [paginator]="true"
+                                    [rows]="5"
+                                    editMode="row"
+                                >
+                                    <ng-template pTemplate="header" let-columns>
+                                        <tr>
+                                            <th></th>
+                                            <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="body" let-row let-editing="editing" let-ri="rowIndex" let-columns="columns">
+                                        <tr [pEditableRow]="row">
+                                            <td>
+                                                <div class="flex align-items-center justify-content-center gap-2" *ngIf="corporateDetailsEnabled">
+                                                    <button *ngIf="!editing" pButton pRipple type="button" pInitEditableRow icon="pi pi-pencil" (click)="onRowEditInitContractTracking(row)" class="p-button-rounded p-button-text"></button>
+                                                    <button *ngIf="editing" pButton pRipple type="button" pSaveEditableRow icon="pi pi-check" (click)="onRowEditSaveContractTracking(row)" class="p-button-rounded p-button-text p-button-success mr-2"></button>
+                                                    <button *ngIf="editing" pButton pRipple type="button" pCancelEditableRow icon="pi pi-times" (click)="onRowEditCancelContractTracking(row, ri)" class="p-button-rounded p-button-text p-button-danger"></button>
+                                                </div>
+                                            </td>
+                                            <td *ngFor="let col of columns" [ngSwitch]="col.field">
+                                                <div *ngSwitchCase="'name'">{{ row[col.field] }}</div>
+                                                <p-cellEditor *ngSwitchCase="'comments'">
+                                                    <ng-template pTemplate="input">
+                                                        <textarea [(ngModel)]="row[col.field]" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                    </ng-template>
+                                                    <ng-template pTemplate="output">
+                                                        {{ row[col.field] }}
+                                                    </ng-template>
+                                                </p-cellEditor>
+                                                <p-cellEditor *ngSwitchDefault>
+                                                    <ng-template pTemplate="input">
+                                                        <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" />
+                                                    </ng-template>
+                                                    <ng-template pTemplate="output">
+                                                        <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" [disabled]="true" />
+                                                    </ng-template>
+                                                </p-cellEditor>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table></div
+                        ></p-tabPanel>
+                    </p-tabView>
+                </p-accordionTab>
+                <p-accordionTab header="Contacts">
+                    <div class="card">
+                        <p-table
+                            [value]="payor.payorContacts"
+                            [columns]="colsPayorContacts"
+                            styleClass="p-datatable-striped"
+                            [tableStyle]="{ 'min-width': '50rem' }"
+                            [scrollable]="true"
+                            scrollHeight="flex"
+                            [sortOrder]="-1"
+                            selectionMode="single"
+                            dataKey="payorContactId"
+                            [rowsPerPageOptions]="[5, 10, 50]"
+                            [paginator]="true"
+                            [rows]="5"
+                            editMode="row"
+                        >
+                            <ng-template pTemplate="header" let-columns>
+                                <tr>
+                                    <th class="text-center"><p-button icon="pi pi-plus" (click)="createPayorContact()" [disabled]="!corporateDetailsEnabled" /></th>
+                                    <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-row let-editing="editing" let-ri="rowIndex" let-columns="columns">
+                                <tr [pEditableRow]="row">
+                                    <td>
+                                        <p-button icon="pi pi-expand" (click)="openPayorContact(row, ri)" title="Open" [disabled]="!corporateDetailsEnabled" />
+                                        <p-button icon="pi pi-times" (click)="deletePayorContact(row, ri)" severity="danger" title="Delete" [disabled]="!corporateDetailsEnabled" />
+                                    </td>
+                                    <td *ngFor="let col of columns">
+                                        <div>{{ row[col.field] }}</div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </p-accordionTab>
+                <p-accordionTab header="Activity Notes">
+                    <div class="flex flex-row mt-2 gap-2">
+                        <div>
+                            <p-floatLabel>
+                                <p-dropdown inputId="contactCtrl" [formControl]="contactCtrl" [options]="payorContactsWithAll" optionLabel="name" optionValue="payorContactId" [style]="{ 'min-width': '200px' }" dataKey="payorContactId" />
+                                <label for="contactCtrl">Contact</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-floatLabel>
+                                <p-dropdown inputId="clientCtrl" [formControl]="clientCtrl" [options]="clientsWithAll" optionLabel="name" optionValue="clientId" [style]="{ 'min-width': '200px' }" dataKey="clientId" />
+                                <label for="clientCtrl">Client</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-floatLabel>
+                                <p-dropdown inputId="accountManagerCtrl" [formControl]="accountManagerCtrl" [options]="accountManagers" optionLabel="name" optionValue="id" [style]="{ 'min-width': '200px' }" dataKey="id" />
+                                <label for="accountManagerCtrl">Account Director</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-floatLabel>
+                                <p-calendar [(ngModel)]="startDate" inputId="startDate" [style]="{ 'min-width': '150px' }" />
+                                <label for="startDate">Start Date</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-floatLabel>
+                                <p-calendar [(ngModel)]="endDate" inputId="endDate" [style]="{ 'min-width': '150px' }" />
+                                <label for="endDate">End Date</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-button label="Generate" icon="pi pi-objects-column" class="mr-1" [raised]="true" [text]="true" (click)="generate()" />
+                        </div>
+                    </div>
+                    <div class="card m-2">
+                        <p-table
+                            [value]="activities"
+                            [columns]="colsActivities"
+                            styleClass="p-datatable-striped"
+                            [tableStyle]="{ 'min-width': '50rem' }"
+                            [scrollable]="true"
+                            scrollHeight="flex"
+                            selectionMode="single"
+                            [totalRecords]="totalRows"
+                            [rows]="5"
+                            dataKey="dataKey"
+                            [lazy]="true"
+                            (onLazyLoad)="loadNotesLazy($any($event))"
+                            [rowsPerPageOptions]="[5, 10, 50]"
+                            [paginator]="true"
+                        >
+                            <ng-template pTemplate="header" let-columns>
+                                <tr>
+                                    <th class="text-center">
+                                        <a href="/home/index/#/activityEntryPayor/0" target="_blank" rel="noopener noreferrer" class="p-ripple p-element p-button p-component p-button-icon-only no-underline">
+                                            <i class="pi pi-plus"></i>
+                                        </a>
+                                    </th>
+                                    <th *ngFor="let col of columns">{{ col.header }}</th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-row let-editing="editing" let-ri="rowIndex" let-columns="columns">
+                                <tr [pEditableRow]="row">
+                                    <td class="text-center" style="min-width: 120px">
+                                        <p-buttonGroup>
+                                            <a href="/home/index/#/activityEntryPayor/{{ row.payorActivityId }}" target="_blank" rel="noopener noreferrer" class="p-ripple p-element p-button p-component p-button-icon-only no-underline" *ngIf="row.payorActivityId">
+                                                <i class="pi pi-expand"></i>
+                                            </a>
+                                            <a href="/home/index/#/activityEntryClient/{{ row.clientActivityId }}" target="_blank" rel="noopener noreferrer" class="p-ripple p-element p-button p-component p-button-icon-only no-underline" *ngIf="row.clientActivityId">
+                                                <i class="pi pi-expand"></i>
+                                            </a>
+                                            <!-- <p-button icon="pi pi-expand" (click)="openPayorContact(row, ri)" title="Open" [disabled]="!corporateDetailsEnabled" /> -->
+                                            <p-button icon="pi pi-times" (click)="deletePayorNote(row, ri)" severity="danger" title="Delete" [disabled]="!corporateDetailsEnabled" />
+                                        </p-buttonGroup>
+                                    </td>
+                                    <td *ngFor="let col of columns">
+                                        <div>{{ row[col.field] }}</div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </p-accordionTab>
+                <p-accordionTab header="Therapeutic Class / Formulary">
+                    <div class="flex flex-row mt-2 gap-2 mb-3">
+                        <div>
+                            <p-floatLabel>
+                                <p-dropdown inputId="therapeuticCtrl" [formControl]="therapeuticCtrl" [options]="therapeutics" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="therapeuticCategoryId" />
+                                <label for="therapeuticCtrl">Therapeutic Class</label>
+                            </p-floatLabel>
+                        </div>
+                        <div>
+                            <p-floatLabel>
+                                <p-dropdown inputId="clientCtrl2" [formControl]="clientCtrl2" [options]="clients" optionLabel="name" optionValue="clientId" [style]="{ 'min-width': '200px' }" dataKey="clientId" />
+                                <label for="clientCtrl2">Client</label>
+                            </p-floatLabel>
+                        </div>
+                        <div *ngIf="payorProducts.length">
+                            <p-floatLabel>
+                                <p-dropdown inputId="payorProductCtrl" [formControl]="payorProductCtrl" [options]="payorProducts" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="productId" />
+                                <label for="payorProductCtrl">Product</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="flex-grow-1 text-right">
+                            <p-button label="Save" icon="pi pi-objects-column" class="mr-1" [raised]="true" [text]="true" (click)="saveFormulary()" [disabled]="!corporateDetailsEnabled" />
+                        </div>
+                    </div>
+                    <div *ngIf="therapeuticCtrl.value?.hasPolicy">
+                        <div class="mt-4">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="payorTherapeuticCategoryPolicies.commercial" id="commercialPolicy" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                <label for="commercialPolicy">{{ therapeuticCtrl.value.name }} Commercial Policy</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="mt-4">
+                            <p-floatLabel>
+                                <textarea [(ngModel)]="payorTherapeuticCategoryPolicies.medicare" id="medicarePolicy" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                <label for="medicarePolicy">{{ therapeuticCtrl.value.name }} Medicare Policy</label>
+                            </p-floatLabel>
+                        </div>
+                        <div *ngIf="payorProducts.length > 0 && payorProductCtrl.value?.productId > 0">
+                            <p-fieldset [legend]="payorProductCtrl.value.name + ' Commercial Policy'">
+                                <div class="mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="payorProductCtrl.value!.commercialExpectedCoverage" id="commercialExpectedCoverage" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                        <label for="commercialExpectedCoverage"> Expected Coverage for {{ payorProductCtrl.value.name }} at launch</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="payorProductCtrl.value!.commercialActionPlan" id="commercialActionPlan" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                        <label for="commercialActionPlan"> Action plan and resources required</label>
+                                    </p-floatLabel>
+                                </div>
+                            </p-fieldset>
+                            <p-fieldset [legend]="payorProductCtrl.value.name + ' Medicare Policy'">
+                                <div class="mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="payorProductCtrl.value.medicareExpectedCoverage" id="medicareExpectedCoverage" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                        <label for="medicareExpectedCoverage"> Expected Coverage for {{ payorProductCtrl.value.name }} at launch</label>
+                                    </p-floatLabel>
+                                </div>
+                                <div class="mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="payorProductCtrl.value.medicareActionPlan" id="medicareActionPlan" rows="3" cols="30" pInputTextarea class="w-full mt-1" [disabled]="!corporateDetailsEnabled"> </textarea>
+                                        <label for="medicareActionPlan"> Action plan and resources required</label>
+                                    </p-floatLabel>
+                                </div>
+                            </p-fieldset>
+                        </div>
+                    </div>
+                    <p-fieldset *ngFor="let formulary of formularies" [legend]="formulary.name">
+                        <p-table [value]="formulary.productTierCategories" [columns]="colsFormulary" styleClass="p-datatable-striped" [tableStyle]="{ 'min-width': '50rem' }" [scrollable]="true" scrollHeight="flex" selectionMode="single" dataKey="productId" editMode="row">
+                            <ng-template pTemplate="header" let-columns>
+                                <tr>
+                                    <th>Product</th>
+                                    <th *ngFor="let col of columns" class="text-center">{{ col }}</th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-row let-ri="rowIndex" let-columns="columns">
+                                <tr>
+                                    <td>{{ row.name }}</td>
+                                    <td *ngFor="let col of columns" class="text-center">
+                                        <p-checkbox [(ngModel)]="row[col]" [binary]="true" inputId="binary" [disabled]="!corporateDetailsEnabled" />
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-fieldset>
+                </p-accordionTab>
+            </p-accordion>
+        </p-panel>
+    </div>
+</div>
+<p-dialog header="New Payor Website" [modal]="true" [draggable]="false" [(visible)]="isWebsiteVisible" [style]="{ width: '50rem' }" [closable]="false" [closeOnEscape]="false">
+    <p-card>
+        <div class="flex flex-column gap-4" [formGroup]="websiteForm">
+            <div>
+                <p-floatLabel>
+                    <input type="text" inputId="urlWebsiteCd" pInputText formControlName="url" class="w-full" />
+                    <label for="urlWebsiteCd">Url</label>
+                </p-floatLabel>
+            </div>
+            <div>
+                <p-floatLabel>
+                    <input type="text" inputId="urlNameCd" pInputText formControlName="name" class="w-full" />
+                    <label for="urlNameCd">Name</label>
+                </p-floatLabel>
+            </div>
+        </div>
+    </p-card>
+
+    <ng-template pTemplate="footer">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (onClick)="saveWebsite()" />
+        <p-button icon="pi pi-times" label="Cancel" [outlined]="true" severity="secondary" (onClick)="closeWebsite()" />
+    </ng-template>
+</p-dialog>
+<app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>

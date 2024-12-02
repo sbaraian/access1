@@ -202,3 +202,15 @@ input[type=date], input[type=datetime], input[type=email], input[type=number], i
 sortalticon{
     display: none;
 }
+.pms-630-pc{
+    background-color:  #75CFE5;
+}
+.pms-315-pc{
+    background-color:  #00718C!important;;
+    color:white;
+    .p-panel-header{
+        background-color:#00718C!important;
+        padding-top:0;
+        padding-bottom: 0;
+    }
+}
