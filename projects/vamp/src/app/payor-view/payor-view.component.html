@@ -175,6 +175,9 @@
                                     [paginator]="true"
                                     [rows]="5"
                                     editMode="row"
+                                    [showCurrentPageReport]="true"
+                                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                                    paginatorStyleClass="justify-content-end"
                                 >
                                     <ng-template pTemplate="header" let-columns>
                                         <tr>
@@ -360,6 +363,9 @@
                                     [paginator]="true"
                                     [rows]="5"
                                     editMode="row"
+                                    [showCurrentPageReport]="true"
+                                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                                    paginatorStyleClass="justify-content-end"
                                 >
                                     <ng-template pTemplate="header" let-columns>
                                         <tr>
@@ -418,18 +424,21 @@
                             [paginator]="true"
                             [rows]="5"
                             editMode="row"
+                            [showCurrentPageReport]="true"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                            paginatorStyleClass="justify-content-end"
                         >
                             <ng-template pTemplate="header" let-columns>
                                 <tr>
-                                    <th class="text-center"><p-button icon="pi pi-plus" (click)="createPayorContact()" [disabled]="!corporateDetailsEnabled" /></th>
+                                    <th class="text-center" style="width: 130px"><p-button icon="pi pi-plus" (click)="createPayorContact()" [disabled]="!corporateDetailsEnabled" /></th>
                                     <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
                                 </tr>
                             </ng-template>
 
                             <ng-template pTemplate="body" let-row let-editing="editing" let-ri="rowIndex" let-columns="columns">
                                 <tr [pEditableRow]="row">
-                                    <td>
-                                        <p-button icon="pi pi-expand" (click)="openPayorContact(row, ri)" title="Open" [disabled]="!corporateDetailsEnabled" />
+                                    <td class="text-center">
+                                        <p-button icon="pi pi-expand" title="Details" (click)="openPayorContact(row, ri)" title="Open" [disabled]="!corporateDetailsEnabled" />
                                         <p-button icon="pi pi-times" (click)="deletePayorContact(row, ri)" severity="danger" title="Delete" [disabled]="!corporateDetailsEnabled" />
                                     </td>
                                     <td *ngFor="let col of columns">
@@ -492,6 +501,9 @@
                             (onLazyLoad)="loadNotesLazy($any($event))"
                             [rowsPerPageOptions]="[5, 10, 50]"
                             [paginator]="true"
+                            [showCurrentPageReport]="true"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                            paginatorStyleClass="justify-content-end"
                         >
                             <ng-template pTemplate="header" let-columns>
                                 <tr>
@@ -514,7 +526,6 @@
                                             <a href="/home/index/#/activityEntryClient/{{ row.clientActivityId }}" target="_blank" rel="noopener noreferrer" class="p-ripple p-element p-button p-component p-button-icon-only no-underline" *ngIf="row.clientActivityId">
                                                 <i class="pi pi-expand"></i>
                                             </a>
-                                            <!-- <p-button icon="pi pi-expand" (click)="openPayorContact(row, ri)" title="Open" [disabled]="!corporateDetailsEnabled" /> -->
                                             <p-button icon="pi pi-times" (click)="deletePayorNote(row, ri)" severity="danger" title="Delete" [disabled]="!corporateDetailsEnabled" />
                                         </p-buttonGroup>
                                     </td>

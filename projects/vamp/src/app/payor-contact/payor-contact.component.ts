@@ -40,7 +40,7 @@ export class PayorContactComponent {
             .saveContact(this.contact)
             .pipe(
                 tap((_) => {
-                    this.messageService.add({ severity: "success", summary: "Success", detail: `Contact ${this.contact.firstName} ${this.contact.lastName} saved.`, life: 3000 });
+                    this.messageService.add({ severity: "success", summary: "Success", detail: `Contact ${this.contact.firstName} ${this.contact.lastName} saved.`, life: 3000, key: "payorContact" });
                     this.ref.close(this.contact);
                 }),
                 takeUntilDestroyed(this.destroyRef),

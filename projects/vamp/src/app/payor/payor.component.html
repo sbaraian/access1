@@ -1,0 +1,183 @@
+<p-toast position="bottom-right" key="payor" />
+<div class="p-2">
+    <div>
+        <p-card>
+            <div class="flex flex-wrap gap-2">
+                <div class="mt-4">
+                    <p-floatLabel>
+                        <input type="text" id="name" pInputText [(ngModel)]="payor.name" required />
+                        <label for="name">Name</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-4">
+                    <p-floatLabel>
+                        <input type="text" id="akaName" pInputText [(ngModel)]="payor.akaName" />
+                        <label for="akaName">Aka Name</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-4">
+                    <p-floatLabel>
+                        <input type="text" id="accountManager" pInputText [(ngModel)]="payor.accountManager" />
+                        <label for="accountManager">Account Manager</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-4">
+                    <p-floatLabel>
+                        <input type="text" id="secondAccountManager" pInputText [(ngModel)]="payor.secondAccountManager" />
+                        <label for="secondAccountManager">Second Account Manager</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-4">
+                    <p-floatLabel>
+                        <p-dropdown inputId="website" [(ngModel)]="payor.payorWebsiteId" [options]="payor.payorWebsites" optionLabel="name" optionValue="payorWebsiteId" [style]="{ 'min-width': '200px' }" dataKey="payorWebsiteId" />
+                        <label for="website">Website</label>
+                    </p-floatLabel>
+                </div>
+                <div class="flex flex-wrap gap-5">
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isActive">Active</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isActive" [binary]="true" inputId="isActive" /></div>
+                    </div>
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isPbm">PBM</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isPbm" [binary]="true" inputId="isPbm" /></div>
+                    </div>
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isMco">MCO</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isMco" [binary]="true" inputId="isMco" /></div>
+                    </div>
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isMedD">Med D</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isMedD" [binary]="true" inputId="isMedD" /></div>
+                    </div>
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isMedFfs">Medicaid FFS</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isMedFfs" [binary]="true" inputId="isMedFfs" /></div>
+                    </div>
+                    <div class="flex flex-column flex-wrap gap-2">
+                        <div><label for="isMedManaged">Medicaid Management</label></div>
+                        <div class="text-center"><p-checkbox [(ngModel)]="payor.isMedManaged" [binary]="true" inputId="isMedManaged" /></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <div>
+                    <p-floatLabel>
+                        <textarea [(ngModel)]="payor.description" id="description" rows="3" cols="30" pInputTextarea class="w-full"> </textarea>
+                        <label for="description">Description</label>
+                    </p-floatLabel>
+                </div>
+            </div>
+        </p-card>
+    </div>
+    <div class="mt-2">
+        <p-card>
+            <p-table
+                [columns]="selectedColumns"
+                [value]="payor.payorContacts"
+                styleClass="p-datatable-striped"
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [scrollable]="true"
+                scrollHeight="flex"
+                sortField="firstName"
+                [sortOrder]="-1"
+                selectionMode="single"
+                dataKey="payorContractId"
+                [rowsPerPageOptions]="[5, 10, 20]"
+                [paginator]="true"
+                [rows]="5"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorStyleClass="justify-content-end"
+            >
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between">
+                        Contacts
+                        <p-button label="Add" icon="pi pi-plus" class="mr-1" [raised]="true" [text]="true" (click)="openContact(null)" />
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th style="width: 120px" class="text-center">
+                            <p-button (onClick)="op.toggle($event)" title="Select columns" icon="pi pi-bars" /> <p-overlayPanel #op><p-multiSelect [options]="cols" [formControl]="selectedColumnsCtrl" optionLabel="header" placeholder="Please select columns"> </p-multiSelect></p-overlayPanel>
+                        </th>
+                        <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}" [class.text-center]="col.type === 'boolean'">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row let-columns="columns">
+                    <tr>
+                        <td class="text-center">
+                            <p-button icon="pi pi-times" (click)="delete(row)" severity="danger" title="Delete" />
+                            <p-button icon="pi pi-expand" title="Details" (click)="openContact(row)" />
+                        </td>
+                        <td *ngFor="let col of columns" [class.text-center]="col.type === 'boolean'" [ngSwitch]="col.type">
+                            <div *ngSwitchCase="'boolean'">
+                                <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" inputId="binary" disabled="true" />
+                            </div>
+                            <div *ngSwitchDefault>{{ row[col.field] }}</div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+    <div class="mt-2">
+        <p-card>
+            <p-table
+                [columns]="selectedAddressColumns"
+                [value]="payor.payorAddresses"
+                styleClass="p-datatable-striped"
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [scrollable]="true"
+                scrollHeight="flex"
+                sortField="Address"
+                [sortOrder]="-1"
+                selectionMode="single"
+                dataKey="payorAddressId"
+                [rowsPerPageOptions]="[5, 10, 20]"
+                [paginator]="true"
+                [rows]="5"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorStyleClass="justify-content-end"
+            >
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between">
+                        Addresses
+                        <p-button label="Add" icon="pi pi-plus" class="mr-1" [raised]="true" [text]="true" (click)="openAddress(null)" />
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th style="width: 120px" class="text-center">
+                            <p-button (onClick)="op.toggle($event)" title="Select columns" icon="pi pi-bars" />
+                            <p-overlayPanel #op><p-multiSelect [options]="colsAddress" [formControl]="selectedAddressColumnsCtrl" optionLabel="header" placeholder="Please select columns"> </p-multiSelect></p-overlayPanel>
+                        </th>
+                        <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}" [class.text-center]="col.type === 'boolean'">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row let-columns="columns">
+                    <tr>
+                        <td class="text-center">
+                            <p-button icon="pi pi-times" (click)="delete(row)" severity="danger" title="Delete" />
+                            <p-button icon="pi pi-expand" title="Details" (click)="openAddress(row)" />
+                        </td>
+                        <td *ngFor="let col of columns" [class.text-center]="col.type === 'boolean'" [ngSwitch]="col.type">
+                            <div *ngSwitchCase="'boolean'">
+                                <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" inputId="binary" disabled="true" />
+                            </div>
+                            <div *ngSwitchDefault>{{ row[col.field] }}</div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+    <p-divider />
+    <div class="text-right">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (click)="save()" />
+    </div>
+</div>
+<app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>

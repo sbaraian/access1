@@ -24,12 +24,20 @@
     gap: 10px;
 }
 
+/* Placeholder with floating labels */
+/* 1. Hide placeholder by default */
+input::placeholder {
+    opacity: 0;
+  }
+  /* 2. Show placeholder on focus */
+  input:focus::placeholder {
+    opacity: 1;
+  }
+  
+
 :host ::ng-deep {
     .p-calendar .p-inputtext  {
         text-align: center;
       }
           p-calendar > span > div.p-datepicker { display: none!important; }
-}
-// :host ::ng-deep .p-card.green{
-//     background-color: red;
-// }
+    }

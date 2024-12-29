@@ -1,37 +1,6 @@
 @import "primeicons/primeicons.css";
 @import "../public/themes/mytheme/theme.scss";
 @import "@fontsource/nunito";
-body1::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    background-image: url('../public/4_vshg_logo_final_graphic_large.png');
-    background-size:cover;
-    opacity:0.5;
-}
-body1{
-    margin: 0 2rem 0 2rem;
-}
-body.not-authorized::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    background-image: url('../public/viking_image.jpg');
-    background-size:cover;
-    margin: 0;
-}
-body.authorized::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    z-index:-1;
-    background-image: url('../public/4_vshg_logo_final_graphic_large.png');
-    background-size:cover;
-    opacity:0.5;
-    margin: 0 2rem 0 2rem;
-}
 .primary-header {
     & .p-panel-header{
         background-color: #001A36 !important;
@@ -193,11 +162,40 @@ input[type=date], input[type=datetime], input[type=email], input[type=number], i
 	.no-print {
 		display: none;
 	}
+    html, body {
+        height: auto;
+        font-size: 10pt!important; /* changing to 10pt has no impact */
+        // transform: scale(1);
+    }
+    @page {
+        margin-left: 5px;
+        margin-right: 5px;
+        size: landscape;
+      }
 }
 @media screen {
 	.for-print {
 		display: none;
 	}
+    body.not-authorized::before{
+        content:"";
+        position:fixed;
+        inset:0;
+        z-index:-1;
+        background-image: url('../public/viking_image.jpg');
+        background-size:cover;
+        margin: 0;
+    }
+    body.authorized::before{
+        content:"";
+        position:fixed;
+        inset:0;
+        z-index:-1;
+        background-image: url('../public/4_vshg_logo_final_graphic_large.png');
+        background-size:cover;
+        opacity:0.5;
+        margin: 0 2rem 0 2rem;
+    }
 }
 sortalticon{
     display: none;

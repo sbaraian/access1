@@ -116,7 +116,13 @@ export class ContractsComponent implements OnInit {
 
     open = (row: IContract) => {
         ContractsService.contractId = row.contractId;
-        this.ref = this.dialogService.open(ContractComponent, { width: "95vw", height: "100vh", modal: true, header: `${row.client?.name} | ${row.payor?.name} | ${row.accountDirector?.name}` });
+        const _this = this;
+        this.ref = this.dialogService.open(ContractComponent, {
+            width: "95vw",
+            height: "100vh",
+            modal: true,
+            header: `${row.client?.name} | ${row.payor?.name} | ${row.accountDirector?.name}`,
+        });
         //this.router.navigate(["contracts", id]);
     };
 

@@ -30,8 +30,12 @@ export class PayorService {
         return this.http.put<IPayor>(`api/payors/putPayor/${payor.payorId}`, payor).pipe(map((payor) => this.addPayorAddress(payor)));
     };
 
-    saveContact = (contact: IPayorContact): Observable<IPayor> => {
-        return this.http.put<IPayor>(`api/payorContacts/putPayorContact/${contact.payorContactId}`, contact);
+    saveContact = (contact: IPayorContact): Observable<IPayorContact> => {
+        return this.http.put<IPayorContact>(`api/payorContacts/putPayorContact/${contact.payorContactId}`, contact);
+    };
+
+    delete = (payor: IPayor): Observable<any> => {
+        return this.http.delete<any>(`api/payors/deletePayor/${payor.payorId}`);
     };
 
     deleteContact = (contact: IPayorContact): Observable<any> => {

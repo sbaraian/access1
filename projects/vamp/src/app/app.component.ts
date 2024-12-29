@@ -160,10 +160,17 @@ export class AppComponent implements OnInit {
                         route: "/analytics",
                     },
                 ],
-            } /*
+            },
             {
                 label: "Administration",
-            },*/,
+                items: [
+                    {
+                        icon: "pi pi-th-large",
+                        label: "Payors",
+                        route: "/payors",
+                    },
+                ],
+            },
         ];
     }
 }

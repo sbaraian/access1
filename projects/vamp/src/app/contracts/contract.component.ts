@@ -1,7 +1,10 @@
 import { CommonModule } from "@angular/common";
-import { Component, DestroyRef, Input, OnInit, inject } from "@angular/core";
+import { Component, DestroyRef, ElementRef, Input, OnInit, ViewChild, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import { DateTime } from "luxon";
 import { ConfirmationService, MessageService } from "primeng/api";
 import { ButtonModule } from "primeng/button";
@@ -11,6 +14,7 @@ import { CardModule } from "primeng/card";
 import { CheckboxModule } from "primeng/checkbox";
 import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from "primeng/dropdown";
+import { DialogService } from "primeng/dynamicdialog";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { InputGroupModule } from "primeng/inputgroup";
 import { InputGroupAddonModule } from "primeng/inputgroupaddon";
@@ -23,6 +27,7 @@ import { ToastModule } from "primeng/toast";
 import { TriStateCheckboxModule } from "primeng/tristatecheckbox";
 import { BehaviorSubject, EMPTY, catchError, combineLatest, of } from "rxjs";
 import { distinctUntilChanged, switchMap, tap } from "rxjs/operators";
+
 import { AppService } from "../app.service";
 import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
 import { IChannel, IClient, IProduct } from "../models/client";
@@ -66,7 +71,7 @@ export interface IProductChannelOption {
     ],
     templateUrl: "./contract.component.html",
     styleUrl: "./contract.component.scss",
-    providers: [MessageService, ConfirmationService],
+    providers: [MessageService, ConfirmationService, DialogService],
 })
 export class ContractComponent implements OnInit {
     private appService = inject(AppService);
@@ -75,7 +80,8 @@ export class ContractComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
-
+    private dialogService = inject(DialogService);
+    private route = inject(ActivatedRoute);
     contractId$ = new BehaviorSubject<number>(0);
 
     @Input()
@@ -150,7 +156,64 @@ export class ContractComponent implements OnInit {
     inReviewEntities = ["Viking", "Manufacturer", "Payer"];
     isAmendment = false;
     notes: IContractNote[] = [];
+    @ViewChild("contentToPrint", { static: false }) contentToPrint: ElementRef | null = null;
+    isPrinting = false;
 
+    print = (): void => {
+        const contractId = this.contractId$.getValue();
+        if (contractId) {
+            window.open(`/#/contracts/${contractId}?isPrinting=true`, "_blank");
+        }
+    };
+
+    generatePDF1() {
+        this.isPrinting = true;
+        setTimeout(() => {
+            html2canvas(this.contentToPrint!.nativeElement).then((canvas) => {
+                const imgData = canvas.toDataURL("image/png");
+                const doc = new jsPDF({ unit: "px", format: [canvas.width, canvas.height] });
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = doc.internal.pageSize.getHeight();
+
+                doc.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+                doc.save("1.pdf");
+                this.isPrinting = false;
+            });
+        }, 100);
+    }
+
+    generatePDF2() {
+        this.isPrinting = true;
+        setTimeout(() => {
+            html2canvas(this.contentToPrint!.nativeElement).then((canvas) => {
+                var doc = new jsPDF("p", "px", "a4");
+
+                var imgData = canvas.toDataURL("image/png");
+                var pageHeight = doc.internal.pageSize.getHeight();
+                var pageWidth = doc.internal.pageSize.getWidth();
+
+                var imgHeight = canvas.height; //px to mm
+                var imgWidth = canvas.width; //px to mm
+                var pageCount = Math.ceil((imgHeight * pageWidth) / (pageHeight * imgWidth));
+
+                /* add initial page */
+                doc.addImage(imgData, "PNG", 2, 0, pageWidth - 4, 0);
+
+                /* add extra pages if the div size is larger than a a4 size */
+                if (pageCount > 0) {
+                    var j = 1;
+                    while (j != pageCount) {
+                        doc.addPage();
+                        doc.addImage(imgData, "PNG", 2, -(j * pageHeight), pageWidth - 4, 0);
+                        j++;
+                    }
+                }
+                doc.save("2.pdf");
+                this.isPrinting = false;
+            });
+        }, 100);
+    }
     addNote = (): void => {
         this.notes.unshift({ contractNoteId: 0, reviewDate: null, inReviewEntity: null, note: null });
     };
@@ -471,6 +534,9 @@ export class ContractComponent implements OnInit {
         this.contract.loi = this.contract.contractNegotiationInitiated = this.contract.viking = this.contract.manufacturer = this.contract.payer = this.contract.contractExecuted = null;
     };
     ngOnInit() {
+        this.route.queryParams.subscribe((params) => {
+            this.isPrinting = params["isPrinting"];
+        });
         if (ContractsService.contractId) {
             this.contract.contractId = ContractsService.contractId;
             ContractsService.contractId = 0;
@@ -582,6 +648,14 @@ export class ContractComponent implements OnInit {
                                 item.value = pc?.value;
                             });
                         }
+                    }
+                }),
+                tap((_) => {
+                    if (this.contract.contractId && this.isPrinting) {
+                        setTimeout(() => {
+                            window.print();
+                            window.close();
+                        }, 1000);
                     }
                 }),
                 takeUntilDestroyed(this.destroyRef),

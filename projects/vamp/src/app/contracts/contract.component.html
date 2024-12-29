@@ -1,191 +1,645 @@
-<p-toast position="bottom-right" />
-<div>
+<div class="no-print" *ngIf="!isPrinting">
+    <p-toast position="bottom-right" />
     <div>
-        <p-panel [toggleable]="true" styleClass="primary-header">
-            <ng-template pTemplate="header">
-                <div class="font-bold">{{ contract.loi ? "Contract Initiation" : "Contract Draft" }}</div>
-            </ng-template>
-            <p-card *ngIf="!!contract.contractId">
-                <div class="flex justify-content-around w-full">
-                    <div class="circle-container pb-1">
-                        <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
-                        <div>
-                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
-                        </div>
-                    </div>
-                    <div class="circle-container pb-1">
-                        <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
-                        <div>
-                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
-                        </div>
-                    </div>
-                    <div class="circle-container" style="flex-grow: 3; gap: 0">
-                        <div class="border-solid border-1 border-gray-500 text-center w-full p-1" style="background-color: #adc8e8">
-                            <div class="flex justify-content-between">
-                                <div class="flex-grow-1 justify-content-center">In Review</div>
-                                <div><p-button icon="pi pi-list" severity="secondary" title="Notes" (click)="isNotesVisible = true" /></div>
+        <div>
+            <p-panel [toggleable]="true" styleClass="primary-header">
+                <ng-template pTemplate="header">
+                    <div class="font-bold">{{ contract.loi ? "Contract Initiation" : "Contract Draft" }}</div>
+                </ng-template>
+                <p-card *ngIf="!!contract.contractId">
+                    <div class="flex justify-content-around w-full">
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
                             </div>
                         </div>
-                        <div class="flex justify-content-around w-full border-solid border-1 border-gray-500 p-1">
-                            <div class="circle-container">
-                                <div class="circle" style="background-color: #59b485">Viking</div>
-                                <div>
-                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                            </div>
+                        </div>
+                        <div class="circle-container" style="flex-grow: 3; gap: 0">
+                            <div class="border-solid border-1 border-gray-500 text-center w-full p-1" style="background-color: #adc8e8">
+                                <div class="flex justify-content-between">
+                                    <div class="flex-grow-1 justify-content-center">In Review</div>
+                                    <div><p-button icon="pi pi-list" severity="secondary" title="Notes" (click)="isNotesVisible = true" /></div>
                                 </div>
                             </div>
-                            <div class="circle-container">
-                                <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
-                                <div>
-                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                            <div class="flex justify-content-around w-full border-solid border-1 border-gray-500 p-1">
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #59b485">Viking</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                    </div>
+                                </div>
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                    </div>
+                                </div>
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #00bbdd">Payer</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="circle-container">
-                                <div class="circle" style="background-color: #00bbdd">Payer</div>
-                                <div>
-                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
-                                </div>
+                        </div>
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                     </div>
-                    <div class="circle-container pb-1">
-                        <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
-                        <div>
-                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
-                        </div>
-                    </div>
-                </div>
-            </p-card>
-        </p-panel>
-        <p-panel styleClass="secondary-header" [toggleable]="true">
-            <ng-template pTemplate="header">
-                <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
-                    <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2" *ngIf="!!contract?.contractId && !isModal">{{ contract.client?.name }} | {{ contract.payor?.name }} | {{ contract.accountDirector?.name }}</div>
-                    <div class="flex flex-grow-1 align-items-center justify-content-end h-full">
-                        <div>
-                            <p-buttonGroup>
-                                <p-button icon="pi pi-pen-to-square" severity="secondary" title="Amend" (click)="amend()" *ngIf="contract.contractId > 0 && contract.contractExecuted" />
-                                <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" *ngIf="!isInvalid" />
-                                <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
-                            </p-buttonGroup>
-                        </div>
-                    </div>
-                </div>
-            </ng-template>
-            <ng-template pTemplate="footer">
-                <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center" *ngIf="!!contract?.productChannels?.length">
-                    <div class="flex flex-grow-1 align-items-center justify-content-end h-full">
-                        <div>
-                            <p-buttonGroup>
-                                <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" />
-                                <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
-                            </p-buttonGroup>
-                        </div>
-                    </div>
-                </div>
-            </ng-template>
-            <div class="mt-2 flex flex-row flex-wrap justify-content-between" [formGroup]="fg" *ngIf="!contract?.contractId && !isInvalid">
-                <div class="flex justify-content-start flex-wrap gap-2">
-                    <div class="mt-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="clientCtrl" [formControl]="clientCtrl" [options]="clients" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="clientId" />
-                            <label for="clientCtrl">Client</label>
-                        </p-floatLabel>
-                    </div>
-                    <div class="mt-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="payorCtrl" [formControl]="payorCtrl" [options]="payors" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="payorId" />
-                            <label for="payorCtrl">Payors</label>
-                        </p-floatLabel>
-                    </div>
-                    <div class="mt-3">
-                        <p-floatLabel>
-                            <p-dropdown inputId="accountManagerCtrl" [formControl]="accountManagerCtrl" [options]="accountManagers" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="id" />
-                            <label for="accountManagerCtrl">Account Director</label>
-                        </p-floatLabel>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-2" *ngIf="isAmendment">
-                <p-floatLabel>
-                    <input inputId="title" pInputText [(ngModel)]="contract.title" class="w-full mt-1" />
-                    <label for="title">Title</label>
-                </p-floatLabel>
-            </div>
-            <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
-                <p-floatLabel>
-                    <textarea [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
-                    <label for="comments">Comments/Notes</label>
-                </p-floatLabel>
-            </div>
-            <p-panel styleClass="secondary-header" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)" [toggleable]="true">
+                </p-card>
+            </p-panel>
+            <p-panel styleClass="secondary-header" [toggleable]="true">
                 <ng-template pTemplate="header">
                     <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
-                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Rebate Negotiation</div>
+                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2" *ngIf="!!contract?.contractId && !isModal">{{ contract.client?.name }} | {{ contract.payor?.name }} | {{ contract.accountDirector?.name }}</div>
                         <div class="flex flex-grow-1 align-items-center justify-content-end h-full">
                             <div>
                                 <p-buttonGroup>
-                                    <p-button icon="pi pi-plus" severity="secondary" title="Add" (click)="addProductChannel()" />
+                                    <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="generatePDF1()" label="1" />
+                                    <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="generatePDF2()" label="2" />
+                                    <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" label="3" />
+                                    <p-button icon="pi pi-pen-to-square" severity="secondary" title="Amend" (click)="amend()" *ngIf="contract.contractId > 0 && contract.contractExecuted" />
+                                    <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" *ngIf="!isInvalid" />
+                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
                                 </p-buttonGroup>
                             </div>
                         </div>
                     </div>
                 </ng-template>
-                <p-tabView [scrollable]="true" selectOnFocus="true" (onChange)="productChannelIndex = $event.index">
-                    <p-tabPanel *ngFor="let productChannel of contract.productChannels; let idx = index">
-                        <ng-template pTemplate="header">
-                            <div class="mb-1">
-                                <p-card [styleClass]="productChannelIndex === idx ? 'pms-630-pc' : ''">
-                                    <div>
-                                        <div class="flex justify-content-between align-items-center">
-                                            <div class="flex flex-column gap-2 text-center">
-                                                <div>
-                                                    <label for="isCompleted">Completed</label>
+                <ng-template pTemplate="footer">
+                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center" *ngIf="!!contract?.productChannels?.length">
+                        <div class="flex flex-grow-1 align-items-center justify-content-end h-full">
+                            <div>
+                                <p-buttonGroup>
+                                    <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" />
+                                    <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" />
+                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
+                                </p-buttonGroup>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+                <div class="mt-2 flex flex-row flex-wrap justify-content-between" [formGroup]="fg" *ngIf="!contract?.contractId && !isInvalid">
+                    <div class="flex justify-content-start flex-wrap gap-2">
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="clientCtrl" [formControl]="clientCtrl" [options]="clients" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="clientId" />
+                                <label for="clientCtrl">Client</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="payorCtrl" [formControl]="payorCtrl" [options]="payors" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="payorId" />
+                                <label for="payorCtrl">Payors</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="accountManagerCtrl" [formControl]="accountManagerCtrl" [options]="accountManagers" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="id" />
+                                <label for="accountManagerCtrl">Account Director</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2" *ngIf="isAmendment">
+                    <p-floatLabel>
+                        <input inputId="title" pInputText [(ngModel)]="contract.title" class="w-full mt-1" />
+                        <label for="title">Title</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
+                    <p-floatLabel>
+                        <textarea [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                        <label for="comments">Comments/Notes</label>
+                    </p-floatLabel>
+                </div>
+                <p-panel styleClass="secondary-header" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)" [toggleable]="true">
+                    <ng-template pTemplate="header">
+                        <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                            <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Rebate Negotiation</div>
+                            <div class="flex flex-grow-1 align-items-center justify-content-end h-full">
+                                <div>
+                                    <p-buttonGroup>
+                                        <p-button icon="pi pi-plus" severity="secondary" title="Add" (click)="addProductChannel()" />
+                                    </p-buttonGroup>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <p-tabView [scrollable]="true" selectOnFocus="true" (onChange)="productChannelIndex = $event.index">
+                        <p-tabPanel *ngFor="let productChannel of contract.productChannels; let idx = index">
+                            <ng-template pTemplate="header">
+                                <div class="mb-1">
+                                    <p-card [styleClass]="productChannelIndex === idx ? 'pms-630-pc' : ''">
+                                        <div>
+                                            <div class="flex justify-content-between align-items-center">
+                                                <div class="flex flex-column gap-2 text-center">
+                                                    <div>
+                                                        <label for="isCompleted">Completed</label>
+                                                    </div>
+                                                    <div>
+                                                        <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                                <div class="text-right">
+                                                    <p-button icon="pi pi-trash" severity="danger" title="Remove" (click)="removeProductChannel(idx)" />
                                                 </div>
                                             </div>
-                                            <div class="text-right">
-                                                <p-button icon="pi pi-trash" severity="danger" title="Remove" (click)="removeProductChannel(idx)" />
+                                            <div class="mt-4">
+                                                <p-dropdown
+                                                    appendTo="body"
+                                                    placeholder="Product and Channel"
+                                                    inputId="productChannelCtrl"
+                                                    [(ngModel)]="productChannel.value"
+                                                    [options]="productChannel.options"
+                                                    optionLabel="name"
+                                                    optionValue="value"
+                                                    [style]="{ 'min-width': '200px' }"
+                                                    (onChange)="changeProductChannel(idx)"
+                                                />
                                             </div>
                                         </div>
-                                        <div class="mt-4">
-                                            <p-dropdown
-                                                appendTo="body"
-                                                placeholder="Product and Channel"
-                                                inputId="productChannelCtrl"
-                                                [(ngModel)]="productChannel.value"
-                                                [options]="productChannel.options"
-                                                optionLabel="name"
-                                                optionValue="value"
-                                                [style]="{ 'min-width': '200px' }"
-                                                (onChange)="changeProductChannel(idx)"
-                                            />
+                                    </p-card>
+                                </div>
+                            </ng-template>
+                            <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                                <ng-template pTemplate="header">
+                                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Contract</div>
+                                    </div>
+                                </ng-template>
+                                <div class="flex flex-row flex-wrap gap-4">
+                                    <div class="flex flex-column gap-2 text-center">
+                                        <div>
+                                            <label for="float-input">Effective Date</label>
+                                        </div>
+                                        <div>
+                                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
                                         </div>
                                     </div>
-                                </p-card>
+                                    <div class="flex flex-column gap-2 text-center">
+                                        <div>
+                                            <label for="endDate">End Date</label>
+                                        </div>
+                                        <div>
+                                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-column gap-2 text-center">
+                                        <div>
+                                            <label>Contract Length</label>
+                                        </div>
+                                        <div>
+                                            {{ productChannel.effectiveDate | contractLength: productChannel.endDate }}
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-column gap-2 text-center">
+                                        <div>
+                                            <label for="autoRenew">Auto-Renew</label>
+                                        </div>
+                                        <div>
+                                            <p-triStateCheckbox inputId="autoRenew" [(ngModel)]="productChannel.autoRenew" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <p-floatLabel>
+                                        <textarea [(ngModel)]="productChannel.description" id="description" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                        <label for="description">Description</label>
+                                    </p-floatLabel>
+                                </div>
+                            </p-panel>
+                            <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                                <ng-template pTemplate="header">
+                                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Fees</div>
+                                    </div>
+                                </ng-template>
+                                <div class="grid justify-content-between mt-4">
+                                    <div class="flex col-2 flex-column text-center p-2 justify-content-between">
+                                        <div>
+                                            <label for="adminFee">Admin Fee</label>
+                                        </div>
+                                        <p-inputGroup>
+                                            <p-inputGroupAddon>
+                                                <i class="pi pi-percentage"></i>
+                                            </p-inputGroupAddon>
+                                            <input inputId="adminFee" pInputText [(ngModel)]="productChannel.adminFee" />
+                                        </p-inputGroup>
+                                    </div>
+                                    <div class="flex col-2 flex-column text-center p-2 justify-content-between">
+                                        <div>
+                                            <label for="dataPortalFee">Data/Portal Fee</label>
+                                        </div>
+                                        <p-inputGroup>
+                                            <p-inputGroupAddon>
+                                                <i class="pi pi-percentage"></i>
+                                            </p-inputGroupAddon>
+                                            <input inputId="dataPortalFee" pInputText [(ngModel)]="productChannel.dataPortalFee" />
+                                        </p-inputGroup>
+                                    </div>
+                                    <div class="flex col-2 flex-column text-center p-2 justify-content-between">
+                                        <div>
+                                            <label for="gpoEnterpriseFee">GPO/Enterprise Fee</label>
+                                        </div>
+                                        <p-inputGroup>
+                                            <p-inputGroupAddon>
+                                                <i class="pi pi-percentage"></i>
+                                            </p-inputGroupAddon>
+                                            <input inputId="gpoEnterpriseFee" pInputText [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
+                                        </p-inputGroup>
+                                    </div>
+                                    <div class="flex col-2 flex-column text-center p-2 justify-content-between">
+                                        <div>
+                                            <label for="otherFee">Other Fee</label>
+                                        </div>
+                                        <p-inputGroup>
+                                            <p-inputGroupAddon>
+                                                <i class="pi pi-percentage"></i>
+                                            </p-inputGroupAddon>
+                                            <input inputId="otherFee" pInputText [(ngModel)]="productChannel.otherFee" />
+                                        </p-inputGroup>
+                                    </div>
+                                    <div class="flex col-2 flex-column text-center p-2 justify-content-between">
+                                        <div>
+                                            <label for="otherFeeDescription">Other Fee Description</label>
+                                        </div>
+                                        <input pInputText id="otherFeeDescription" [(ngModel)]="productChannel.otherFeeDescription" />
+                                    </div>
+                                    <div *ngIf="($any(productChannel.gpoEnterpriseFee) + '')?.toLowerCase() === 'sliding scale'" class="flex col-offset-5 col-5 flex-column text-center p-2 mt-4">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                            <label for="gpoEnterpriseFeeSlidingScale">Sliding Scale Description</label>
+                                        </p-floatLabel>
+                                    </div>
+                                </div>
+                            </p-panel>
+                            <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                                <ng-template pTemplate="header">
+                                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Rebates</div>
+                                    </div>
+                                </ng-template>
+
+                                <div class="flex">
+                                    <div *ngFor="let prefBrand of prefBrands; let idx2 = index" class="flex-1 border-solid border-1 border-round-top-lg" [class]="{ 'pms-630-pc': prefBrandIndex === idx2, 'border-left-none': idx2 > 0 }" (click)="selectPrefBrand(idx2)">
+                                        <div class="flex justify-content-between gap-4 align-items-center p-2">
+                                            <div class="flex flex-column gap-2 text-center">
+                                                <div style="white-space: nowrap">{{ prefBrand.title }}</div>
+                                                <div>
+                                                    <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-column gap-2 text-center">
+                                                <div>
+                                                    <label for="isCompleted">Complete</label>
+                                                </div>
+                                                <div>
+                                                    <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex">
+                                            <div
+                                                *ngFor="let exclusion of exclusions; let idx3 = index"
+                                                (click)="exclusionIndex = idx2 * 4 + idx3"
+                                                class="flex-1 border-solid border-1 border-round-top-lg border-left-none border-bottom-none"
+                                                [class]="{ 'pms-315-pc': exclusionIndex === idx2 * 4 + idx3, 'border-right-none': idx3 > 0 }"
+                                            >
+                                                <div class="flex justify-content-between gap-4 align-items-center p-2">
+                                                    <div class="flex flex-column gap-2 text-center w-full">
+                                                        <div style="white-space: nowrap">{{ exclusion.title }}</div>
+                                                        <div>
+                                                            <p-button label="Duplicate" icon="pi pi-clone" [iconPos]="idx3 === 0 ? 'right' : 'left'" (click)="duplicate(productChannel.prefBrands[prefBrand.field], idx3)" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex-column p-4 border-solid border-1 border-top-none" *ngIf="prefBrandIndex >= 0 && productChannel.prefBrands[prefBrands[prefBrandIndex].field]">
+                                    <div class="w-full">
+                                        <p-floatLabel>
+                                            <textarea [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                            <label for="exclusionComments">Exclusion / Non-Excl. Notes</label>
+                                        </p-floatLabel>
+                                    </div>
+                                    <div *ngIf="exclusionIndex % 2 === 0">
+                                        <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['exclusion'] }"></ng-container>
+                                    </div>
+                                    <div *ngIf="exclusionIndex % 2 === 1">
+                                        <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['nonExclusion'] }"></ng-container>
+                                    </div>
+                                </div>
+                            </p-panel>
+                            <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                                <ng-template pTemplate="header">
+                                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Price Protection Agreement (PP)</div>
+                                    </div>
+                                </ng-template>
+
+                                <div class="flex flex-column pt-4">
+                                    <div>
+                                        <p-table [value]="productChannel.ppas" styleClass="p-datatable-striped">
+                                            <ng-template pTemplate="header">
+                                                <tr>
+                                                    <th class="w-2">Baseline WAC Effective Date</th>
+                                                    <th class="w-2">End Date</th>
+                                                    <th class="w-2">Cap</th>
+                                                    <th>Cap Description</th>
+                                                    <th class="w-2">Share Below Cap</th>
+                                                    <th class="w-2">Share Above Cap</th>
+                                                    <th style="width: 5rem"><button type="button" pButton pRipple icon="pi pi-plus" (click)="addPpa(productChannel)"></button></th>
+                                                </tr>
+                                            </ng-template>
+                                            <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
+                                                <tr>
+                                                    <td>
+                                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                    </td>
+                                                    <td>
+                                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                    </td>
+                                                    <td>
+                                                        <p-inputGroup>
+                                                            <p-inputGroupAddon>
+                                                                <i class="pi pi-percentage"></i>
+                                                            </p-inputGroupAddon>
+                                                            <input pInputText [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
+                                                        </p-inputGroup>
+                                                    </td>
+                                                    <td><input pInputText [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
+                                                    <td>
+                                                        <p-inputGroup>
+                                                            <p-inputGroupAddon>
+                                                                <i class="pi pi-percentage"></i>
+                                                            </p-inputGroupAddon>
+                                                            <input pInputText [(ngModel)]="ppa.shareBellowCap" />
+                                                        </p-inputGroup>
+                                                    </td>
+                                                    <td>
+                                                        <p-inputGroup>
+                                                            <p-inputGroupAddon>
+                                                                <i class="pi pi-percentage"></i>
+                                                            </p-inputGroupAddon>
+                                                            <input pInputText [(ngModel)]="ppa.shareAboveCap" />
+                                                        </p-inputGroup>
+                                                    </td>
+                                                    <td><button type="button" pButton pRipple icon="pi pi-trash" (click)="deletePpa(productChannel, ri)" severity="danger"></button></td>
+                                                </tr>
+                                                <tr *ngIf="($any(ppa.ppCap) + '')?.toLowerCase() === 'cpi'">
+                                                    <td colspan="8">
+                                                        <p-floatLabel>
+                                                            <textarea [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                            <label for="threeYearAverageMedicalCpi">3 Year Average Medical CPI</label>
+                                                        </p-floatLabel>
+                                                    </td>
+                                                </tr>
+                                            </ng-template>
+                                        </p-table>
+                                    </div>
+                                </div>
+                            </p-panel>
+                        </p-tabPanel>
+                    </p-tabView>
+                </p-panel>
+            </p-panel>
+        </div>
+    </div>
+    <app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>
+    <p-dialog header="Review Notes" [modal]="true" [draggable]="false" [(visible)]="isNotesVisible" [style]="{ width: '50rem' }" [closable]="false" [closeOnEscape]="false">
+        <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: notes, showDelete: true } }"></ng-container>
+        <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: contract.contractNotes, showDelete: false } }"></ng-container>
+        <ng-template pTemplate="footer">
+            <p-button icon="pi pi-times" label="Close" [outlined]="true" severity="secondary" (onClick)="isNotesVisible = false" />
+            <p-button icon="pi pi-plus" label="Add" [outlined]="true" severity="secondary" (onClick)="addNote()" />
+            <p-button icon="pi pi-save" label="Apply" [outlined]="true" severity="secondary" (onClick)="applyNotes()" />
+        </ng-template>
+    </p-dialog>
+</div>
+<ng-template #notesTemplate let-data>
+    <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
+        <div class="col-3 mt-1">
+            <p-floatLabel>
+                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
+                <label for="reviewDate">Review Date</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-3 mt-1">
+            <p-floatLabel>
+                <p-dropdown inputId="inReviewEntity" [(ngModel)]="note.inReviewEntity" [options]="inReviewEntities" appendTo="body" [disabled]="!data.showDelete" />
+                <label for="inReviewEntity">In Review Entity</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-6 mt-1" [class.col-6]="!data.showDelete" [class.col-5]="data.showDelete">
+            <p-floatLabel>
+                <textarea [(ngModel)]="note.note" id="note" rows="3" cols="30" pInputTextarea class="w-full" [disabled]="!data.showDelete"> </textarea>
+                <label for="note">Comments/note</label>
+            </p-floatLabel>
+        </div>
+        <div class="col-1 mt-1" *ngIf="data.showDelete"><p-button icon="pi pi-trash" [outlined]="true" severity="danger" (onClick)="deleteNote(idx)" /></div>
+    </div>
+</ng-template>
+
+<ng-template #rebatesTemplate let-exclusion>
+    <p-table [value]="exclusion.rebates" styleClass="p-datatable-striped">
+        <ng-template pTemplate="header">
+            <tr>
+                <th class="w-2">Rebate</th>
+                <th class="w-2">Rebate%</th>
+                <th>Description</th>
+                <th style="width: 5rem"><p-button icon="pi pi-plus" (click)="addRebate(exclusion)" styleClass="no-print" /></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rebate let-ri="rowIndex">
+            <tr>
+                <td>
+                    <p-dropdown appendTo="body" inputId="rebate" [(ngModel)]="rebate.rebate" [options]="['1:1', '1:2', '1:3', '1:4', '1:5', '1:Many', 'Listed']" styleClass="w-full" />
+                </td>
+                <td>
+                    <p-inputGroup>
+                        <p-inputGroupAddon>
+                            <i class="pi pi-percentage"></i>
+                        </p-inputGroupAddon>
+                        <input pInputText [(ngModel)]="rebate.rebatePercentage" />
+                    </p-inputGroup>
+                </td>
+                <td><input pInputText [(ngModel)]="rebate.otherFeeDescription" class="w-full" /></td>
+                <td><p-button icon="pi pi-trash" (click)="deleteRebate(exclusion, ri)" severity="danger" styleClass="no-print" /></td>
+            </tr>
+        </ng-template>
+    </p-table>
+</ng-template>
+<!--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
+<div #contentToPrint style="width: min-content">
+    <div *ngIf="isPrinting">
+        <div>
+            <p-panel styleClass="primary-header" [toggleable]="false">
+                <ng-template pTemplate="header">
+                    <div class="font-bold">{{ contract.loi ? "Contract Initiation" : "Contract Draft" }}</div>
+                </ng-template>
+                <p-card *ngIf="!!contract.contractId">
+                    <div class="flex justify-content-around w-full">
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
                             </div>
-                        </ng-template>
-                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                        </div>
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                            </div>
+                        </div>
+                        <div class="circle-container" style="flex-grow: 3; gap: 0">
+                            <div class="border-solid border-1 border-gray-500 text-center w-full p-1" style="background-color: #adc8e8">
+                                <div class="flex justify-content-between">
+                                    <div class="flex-grow-1 justify-content-center">In Review</div>
+                                    <div><p-button icon="pi pi-list" severity="secondary" title="Notes" (click)="isNotesVisible = true" /></div>
+                                </div>
+                            </div>
+                            <div class="flex justify-content-around w-full border-solid border-1 border-gray-500 p-1">
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #59b485">Viking</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                    </div>
+                                </div>
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                    </div>
+                                </div>
+                                <div class="circle-container">
+                                    <div class="circle" style="background-color: #00bbdd">Payer</div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="circle-container pb-1">
+                            <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
+                            <div>
+                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </p-panel>
+            <p-panel styleClass="secondary-header" [toggleable]="false">
+                <ng-template pTemplate="header">
+                    <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                        <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2" *ngIf="!!contract?.contractId && !isModal">{{ contract.client?.name }} | {{ contract.payor?.name }} | {{ contract.accountDirector?.name }}</div>
+                    </div>
+                </ng-template>
+                <div class="mt-2 flex flex-row flex-wrap justify-content-between" [formGroup]="fg" *ngIf="!contract?.contractId && !isInvalid">
+                    <div class="flex justify-content-start flex-wrap gap-2">
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="clientCtrl" [formControl]="clientCtrl" [options]="clients" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="clientId" />
+                                <label for="clientCtrl">Client</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="payorCtrl" [formControl]="payorCtrl" [options]="payors" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="payorId" />
+                                <label for="payorCtrl">Payors</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="mt-3">
+                            <p-floatLabel>
+                                <p-dropdown inputId="accountManagerCtrl" [formControl]="accountManagerCtrl" [options]="accountManagers" optionLabel="name" [style]="{ 'min-width': '200px' }" dataKey="id" />
+                                <label for="accountManagerCtrl">Account Director</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2" *ngIf="isAmendment">
+                    <p-floatLabel>
+                        <input inputId="title" pInputText [(ngModel)]="contract.title" class="w-full mt-1" />
+                        <label for="title">Title</label>
+                    </p-floatLabel>
+                </div>
+                <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
+                    <p-floatLabel>
+                        <textarea [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                        <label for="comments">Comments/Notes</label>
+                    </p-floatLabel>
+                </div>
+                <p-panel styleClass="secondary-header" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)" [toggleable]="false">
+                    <ng-template pTemplate="header">
+                        <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
+                            <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Rebate Negotiation</div>
+                        </div>
+                    </ng-template>
+                    <p-panel *ngFor="let productChannel of contract.productChannels; let idx = index" [toggleable]="false">
+                        <div class="flex">
+                            <p-card [styleClass]="'pms-630-pc'">
+                                <div>
+                                    <div class="flex justify-content-between align-items-center">
+                                        <div class="flex flex-column gap-2 text-center">
+                                            <div>
+                                                <label for="isCompleted">Completed</label>
+                                            </div>
+                                            <div>
+                                                <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <p-dropdown
+                                            appendTo="body"
+                                            placeholder="Product and Channel"
+                                            inputId="productChannelCtrl"
+                                            [(ngModel)]="productChannel.value"
+                                            [options]="productChannel.options"
+                                            optionLabel="name"
+                                            optionValue="value"
+                                            [style]="{ 'min-width': '200px' }"
+                                            (onChange)="changeProductChannel(idx)"
+                                        />
+                                    </div>
+                                </div>
+                            </p-card>
+                        </div>
+                        <p-panel styleClass="pms-315-pc" [toggleable]="false">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Contract</div>
                                 </div>
                             </ng-template>
-                            <div class="flex flex-row flex-wrap align-items-center mt-3 gap-2">
-                                <div>
-                                    <p-floatLabel>
+                            <div class="flex flex-row flex-wrap gap-4">
+                                <div class="flex flex-column gap-2 text-center">
+                                    <div>
+                                        <label for="float-input">Effective Date</label>
+                                    </div>
+                                    <div>
                                         <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
-                                        <label for="effectiveDate">Effective Date</label>
-                                    </p-floatLabel>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p-floatLabel>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                <div class="flex flex-column gap-2 text-center">
+                                    <div>
                                         <label for="endDate">End Date</label>
-                                    </p-floatLabel>
+                                    </div>
+                                    <div>
+                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                    </div>
                                 </div>
-                                <div class="flex flex-column gap-2 text-center" style="margin-top: -35px">
+                                <div class="flex flex-column gap-2 text-center">
                                     <div>
                                         <label>Contract Length</label>
                                     </div>
@@ -193,7 +647,7 @@
                                         {{ productChannel.effectiveDate | contractLength: productChannel.endDate }}
                                     </div>
                                 </div>
-                                <div class="flex flex-column gap-2 text-center" style="margin-top: -35px">
+                                <div class="flex flex-column gap-2 text-center">
                                     <div>
                                         <label for="autoRenew">Auto-Renew</label>
                                     </div>
@@ -209,14 +663,14 @@
                                 </p-floatLabel>
                             </div>
                         </p-panel>
-                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="false">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Fees</div>
                                 </div>
                             </ng-template>
                             <div class="grid justify-content-between mt-4">
-                                <div class="flex col-2 flex-column text-center p-2">
+                                <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="adminFee">Admin Fee</label>
                                     </div>
@@ -227,7 +681,7 @@
                                         <input inputId="adminFee" pInputText [(ngModel)]="productChannel.adminFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column text-center p-2">
+                                <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="dataPortalFee">Data/Portal Fee</label>
                                     </div>
@@ -238,7 +692,7 @@
                                         <input inputId="dataPortalFee" pInputText [(ngModel)]="productChannel.dataPortalFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column text-center p-2">
+                                <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="gpoEnterpriseFee">GPO/Enterprise Fee</label>
                                     </div>
@@ -249,7 +703,7 @@
                                         <input inputId="gpoEnterpriseFee" pInputText [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column text-center p-2">
+                                <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="otherFee">Other Fee</label>
                                     </div>
@@ -260,7 +714,7 @@
                                         <input inputId="otherFee" pInputText [(ngModel)]="productChannel.otherFee" />
                                     </p-inputGroup>
                                 </div>
-                                <div class="flex col-2 flex-column text-center p-2">
+                                <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="otherFeeDescription">Other Fee Description</label>
                                     </div>
@@ -274,66 +728,64 @@
                                 </div>
                             </div>
                         </p-panel>
-                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="false">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Agreement Rebates</div>
                                 </div>
                             </ng-template>
 
-                            <div class="flex">
-                                <div *ngFor="let prefBrand of prefBrands; let idx2 = index" class="flex-1 border-solid border-1 border-round-top-lg" [class]="{ 'pms-630-pc': prefBrandIndex === idx2, 'border-left-none': idx2 > 0 }" (click)="selectPrefBrand(idx2)">
-                                    <div class="flex justify-content-between gap-4 align-items-center p-2">
-                                        <div class="flex flex-column gap-2 text-center">
-                                            <div style="white-space: nowrap">{{ prefBrand.title }}</div>
-                                            <div>
-                                                <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
-                                            </div>
-                                        </div>
-                                        <div class="flex flex-column gap-2 text-center">
-                                            <div>
-                                                <label for="isCompleted">Complete</label>
-                                            </div>
-                                            <div>
-                                                <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex">
-                                        <div
-                                            *ngFor="let exclusion of exclusions; let idx3 = index"
-                                            (click)="exclusionIndex = idx2 * 4 + idx3"
-                                            class="flex-1 border-solid border-1 border-round-top-lg border-left-none border-bottom-none"
-                                            [class]="{ 'pms-315-pc': exclusionIndex === idx2 * 4 + idx3, 'border-right-none': idx3 > 0 }"
-                                        >
+                            <div *ngFor="let prefBrand of prefBrands; let idx2 = index" class="flex flex-column">
+                                <div *ngFor="let exclusion of exclusions; let idx3 = index">
+                                    <div class="flex flex-column" *ngIf="productChannel.prefBrands[prefBrand.field]!.isChecked">
+                                        <div class="flex flex-column border-solid border-1 border-round-top-lg pms-630-pc w-6">
                                             <div class="flex justify-content-between gap-4 align-items-center p-2">
-                                                <div class="flex flex-column gap-2 text-center w-full">
-                                                    <div style="white-space: nowrap">{{ exclusion.title }}</div>
+                                                <div class="flex flex-column gap-2 text-center">
+                                                    <div style="white-space: nowrap">{{ prefBrand.title }}</div>
                                                     <div>
-                                                        <p-button label="Duplicate" icon="pi pi-clone" [iconPos]="idx3 === 0 ? 'right' : 'left'" (click)="duplicate(productChannel.prefBrands[prefBrand.field], idx3)" />
+                                                        <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
                                                     </div>
+                                                </div>
+                                                <div class="flex flex-column gap-2 text-center">
+                                                    <div>
+                                                        <label for="isCompleted">Complete</label>
+                                                    </div>
+                                                    <div>
+                                                        <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex">
+                                                <div class="flex-1 border-solid border-1 border-round-top-lg border-left-none border-bottom-none pms-315-pc">
+                                                    <div class="flex justify-content-between gap-4 align-items-center p-2">
+                                                        <div class="flex flex-column gap-2 text-center w-full">
+                                                            <div style="white-space: nowrap">{{ exclusion.title }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex-column p-4 border-solid border-1" *ngIf="prefBrandIndex >= 0 && productChannel.prefBrands[prefBrands[prefBrandIndex].field]">
+                                                <div class="w-full">
+                                                    <p-floatLabel>
+                                                        <textarea [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                        <label for="exclusionComments">Exclusion / Non-Excl. Notes</label>
+                                                    </p-floatLabel>
+                                                </div>
+                                                <div *ngIf="exclusionIndex % 2 === 0">
+                                                    <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['exclusion'] }"></ng-container>
+                                                </div>
+                                                <div *ngIf="exclusionIndex % 2 === 1">
+                                                    <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['nonExclusion'] }"></ng-container>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex-column p-4 border-solid border-1 border-top-none" *ngIf="prefBrandIndex >= 0 && productChannel.prefBrands[prefBrands[prefBrandIndex].field]">
-                                <div class="w-full">
-                                    <p-floatLabel>
-                                        <textarea [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
-                                        <label for="exclusionComments">Exclusion / Non-Excl. Notes</label>
-                                    </p-floatLabel>
-                                </div>
-                                <div *ngIf="exclusionIndex % 2 === 0">
-                                    <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['exclusion'] }"></ng-container>
-                                </div>
-                                <div *ngIf="exclusionIndex % 2 === 1">
-                                    <ng-container *ngTemplateOutlet="rebatesTemplate; context: { $implicit: productChannel.prefBrands[prefBrands[prefBrandIndex].field]!['nonExclusion'] }"></ng-container>
-                                </div>
-                            </div>
                         </p-panel>
-                        <p-panel styleClass="pms-315-pc" [toggleable]="true">
+                        <p-panel styleClass="pms-315-pc" [toggleable]="false">
                             <ng-template pTemplate="header">
                                 <div class="flex flex-row flex-wrap justify-content-between w-full align-items-center">
                                     <div class="flex align-items-center justify-content-start font-bold text-white text-lg p-2">Price Protection Agreement (PP)</div>
@@ -351,7 +803,6 @@
                                                 <th>Cap Description</th>
                                                 <th class="w-2">Share Below Cap</th>
                                                 <th class="w-2">Share Above Cap</th>
-                                                <th style="width: 5rem"><button type="button" pButton pRipple icon="pi pi-plus" (click)="addPpa(productChannel)"></button></th>
                                             </tr>
                                         </ng-template>
                                         <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
@@ -387,7 +838,6 @@
                                                         <input pInputText [(ngModel)]="ppa.shareAboveCap" />
                                                     </p-inputGroup>
                                                 </td>
-                                                <td><button type="button" pButton pRipple icon="pi pi-trash" (click)="deletePpa(productChannel, ri)" severity="danger"></button></td>
                                             </tr>
                                             <tr *ngIf="($any(ppa.ppCap) + '')?.toLowerCase() === 'cpi'">
                                                 <td colspan="8">
@@ -402,71 +852,9 @@
                                 </div>
                             </div>
                         </p-panel>
-                    </p-tabPanel>
-                </p-tabView>
+                    </p-panel>
+                </p-panel>
             </p-panel>
-        </p-panel>
+        </div>
     </div>
 </div>
-<ng-template #rebatesTemplate let-exclusion>
-    <p-table [value]="exclusion.rebates" styleClass="p-datatable-striped">
-        <ng-template pTemplate="header">
-            <tr>
-                <th class="w-2">Rebate</th>
-                <th class="w-2">Rebate%</th>
-                <th>Description</th>
-                <th style="width: 5rem"><button type="button" pButton pRipple icon="pi pi-plus" (click)="addRebate(exclusion)"></button></th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-rebate let-ri="rowIndex">
-            <tr>
-                <td>
-                    <p-dropdown appendTo="body" inputId="rebate" [(ngModel)]="rebate.rebate" [options]="['1:1', '1:2', '1:3', '1:4', '1:5', '1:Many', 'Listed']" styleClass="w-full" />
-                </td>
-                <td>
-                    <p-inputGroup>
-                        <p-inputGroupAddon>
-                            <i class="pi pi-percentage"></i>
-                        </p-inputGroupAddon>
-                        <input pInputText [(ngModel)]="rebate.rebatePercentage" />
-                    </p-inputGroup>
-                </td>
-                <td><input pInputText [(ngModel)]="rebate.otherFeeDescription" class="w-full" /></td>
-                <td><button type="button" pButton pRipple icon="pi pi-trash" (click)="deleteRebate(exclusion, ri)" severity="danger"></button></td>
-            </tr>
-        </ng-template>
-    </p-table>
-</ng-template>
-<app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>
-<p-dialog header="Review Notes" [modal]="true" [draggable]="false" [(visible)]="isNotesVisible" [style]="{ width: '50rem' }" [closable]="false" [closeOnEscape]="false">
-    <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: notes, showDelete: true } }"></ng-container>
-    <ng-container *ngTemplateOutlet="notesTemplate; context: { $implicit: { notes: contract.contractNotes, showDelete: false } }"></ng-container>
-    <ng-template pTemplate="footer">
-        <p-button icon="pi pi-times" label="Close" [outlined]="true" severity="secondary" (onClick)="isNotesVisible = false" />
-        <p-button icon="pi pi-plus" label="Add" [outlined]="true" severity="secondary" (onClick)="addNote()" />
-        <p-button icon="pi pi-save" label="Apply" [outlined]="true" severity="secondary" (onClick)="applyNotes()" />
-    </ng-template>
-</p-dialog>
-<ng-template #notesTemplate let-data>
-    <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
-        <div class="col-3 mt-1">
-            <p-floatLabel>
-                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
-                <label for="reviewDate">Review Date</label>
-            </p-floatLabel>
-        </div>
-        <div class="col-3 mt-1">
-            <p-floatLabel>
-                <p-dropdown inputId="inReviewEntity" [(ngModel)]="note.inReviewEntity" [options]="inReviewEntities" appendTo="body" [disabled]="!data.showDelete" />
-                <label for="inReviewEntity">In Review Entity</label>
-            </p-floatLabel>
-        </div>
-        <div class="col-6 mt-1" [class.col-6]="!data.showDelete" [class.col-5]="data.showDelete">
-            <p-floatLabel>
-                <textarea [(ngModel)]="note.note" id="note" rows="3" cols="30" pInputTextarea class="w-full" [disabled]="!data.showDelete"> </textarea>
-                <label for="note">Comments/note</label>
-            </p-floatLabel>
-        </div>
-        <div class="col-1 mt-1" *ngIf="data.showDelete"><p-button icon="pi pi-trash" [outlined]="true" severity="danger" (onClick)="deleteNote(idx)" /></div>
-    </div>
-</ng-template>

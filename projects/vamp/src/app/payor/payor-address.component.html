@@ -1,0 +1,48 @@
+<p-card>
+    <div class="field grid mt-3">
+        <label for="address1" style="width: 100px" class="font-semibold">Address 1</label>
+        <div class="col-12 md:col-10">
+            <input id="address1" type="text" pInputText class="w-full" [(ngModel)]="address!.address1" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="address2" style="width: 100px" class="font-semibold">Address 2</label>
+        <div class="col-12 md:col-10">
+            <input id="address2" type="text" pInputText class="w-full" [(ngModel)]="address!.address2" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="city" style="width: 100px" class="font-semibold">City</label>
+        <div class="col-12 md:col-10">
+            <input id="city" type="text" pInputText class="w-full" [(ngModel)]="address!.city" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="state" style="width: 100px" class="font-semibold">State</label>
+        <div class="col-12 md:col-10">
+            <input id="state" type="text" pInputText class="w-full" [(ngModel)]="address!.state" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="zip" style="width: 100px" class="font-semibold">Zip</label>
+        <div class="col-12 md:col-10">
+            <input id="zip" type="text" pInputText class="w-full" [(ngModel)]="address!.zip" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="phone" style="width: 100px" class="font-semibold">Phone</label>
+        <div class="col-12 md:col-10">
+            <p-inputMask inputId="phone" mask="(999) 999-9999" class="w-full" [(ngModel)]="address!.phone" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="isDefault" style="width: 100px" class="font-semibold">Is Default Address</label>
+        <div class="col-12 md:col-10">
+            <p-checkbox [(ngModel)]="address!.isDefault" [binary]="true" inputId="isDefault" disabled="true" />
+        </div>
+    </div>
+    <p-divider />
+    <div class="text-right">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (click)="save()" />
+    </div>
+</p-card>
