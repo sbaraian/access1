@@ -15,38 +15,38 @@ import { ToastModule } from "primeng/toast";
 import { EMPTY } from "rxjs";
 import { catchError, tap } from "rxjs/operators";
 
-import { IPayorContact } from "../models/payor";
-import { PayorService } from "../payor-view/payor.service";
+import { ClientService } from "../client-view/client.service";
+import { IClientContact } from "../models/client";
 @Component({
-    selector: "app-payor-contact",
+    selector: "app-client-contact",
     standalone: true,
     imports: [ButtonModule, ButtonGroupModule, CardModule, CheckboxModule, DialogModule, DividerModule, FormsModule, InputMaskModule, InputTextModule, ToastModule],
-    templateUrl: "./payor-contact.component.html",
-    styleUrl: "./payor-contact.component.scss",
+    templateUrl: "./client-contact.component.html",
+    styleUrl: "./client-contact.component.scss",
 })
-export class PayorContactComponent {
+export class ClientContactComponent {
     private config = inject(DynamicDialogConfig);
     private ref = inject(DynamicDialogRef);
     private destroyRef = inject(DestroyRef);
-    private payorService = inject(PayorService);
+    private clientService = inject(ClientService);
     private messageService = inject(MessageService);
 
-    contact: IPayorContact;
+    contact: IClientContact;
 
     constructor() {
         this.contact = this.config.data.contact;
     }
 
     save = (): void => {
-        this.payorService
+        this.clientService
             .saveContact(this.contact)
             .pipe(
                 tap((_) => {
-                    this.messageService.add({ severity: "success", summary: "Success", detail: `Contact ${this.contact.firstName} ${this.contact.lastName} saved.`, life: 3000, key: "payorContact" });
+                    this.messageService.add({ severity: "success", summary: "Success", detail: `Contact ${this.contact.name} saved.`, life: 3000, key: "clientContact" });
                     this.ref.close(this.contact);
                 }),
                 catchError((err) => {
-                    this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "payorContact" });
+                    this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "clientContact" });
                     return EMPTY;
                 }),
                 takeUntilDestroyed(this.destroyRef),

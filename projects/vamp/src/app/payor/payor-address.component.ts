@@ -28,7 +28,7 @@ export class PayorAddressComponent {
         this.address = this.config.data.address;
     }
 
-    save = (): void => {
+    add = (): void => {
         this.ref.close(this.address);
     };
 }

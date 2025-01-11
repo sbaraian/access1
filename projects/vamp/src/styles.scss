@@ -1,6 +1,8 @@
 @import "primeicons/primeicons.css";
 @import "../public/themes/mytheme/theme.scss";
 @import "@fontsource/nunito";
+@import "quill/dist/quill.core.css";
+@import "quill/dist/quill.snow.css";
 .primary-header {
     & .p-panel-header{
         background-color: #001A36 !important;

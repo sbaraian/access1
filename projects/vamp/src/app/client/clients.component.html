@@ -1,0 +1,60 @@
+<p-toast position="bottom-right" key="clients" />
+<div class="card" style="height: 80vh">
+    <p-table
+        [columns]="selectedColumns"
+        [value]="clients"
+        styleClass="p-datatable-striped"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        [scrollable]="true"
+        scrollHeight="flex"
+        sortField="contractId"
+        [sortOrder]="-1"
+        selectionMode="single"
+        dataKey="contractId"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        paginatorStyleClass="justify-content-end"
+    >
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between">
+                Clients
+                <p-buttonGroup class="gap-1">
+                    <a class="p-ripple p-element p-button p-component p-button-raised p-button-text no-underline mr-1" target="_blank" href="ReportData/getClientContactsCsv" download="client-contacts.csv" rel="noopener noreferrer"> <i class="pi pi-download mr-2"></i>Contacts </a>
+                    <a class="p-ripple p-element p-button p-component p-button-raised p-button-text no-underline mr-1" target="_blank" href="ReportData/getClientsCsv" download="clients.csv" rel="noopener noreferrer"> <i class="pi pi-download mr-2"></i>Clients </a>
+                    <p-button label="Add" icon="pi pi-plus" class="mr-1" [raised]="true" [text]="true" (click)="open(null)" />
+                    <p-button label="Refresh" icon="pi pi-refresh" class="mr-1" [raised]="true" [text]="true" (click)="refresh$.next(true)" />
+                </p-buttonGroup>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th style="width: 120px" class="text-center">
+                    <p-button (onClick)="op.toggle($event)" title="Select columns" icon="pi pi-bars" /> <p-overlayPanel #op><p-multiSelect [options]="cols" [formControl]="selectedColumnsCtrl" optionLabel="header" placeholder="Please select columns"> </p-multiSelect></p-overlayPanel>
+                </th>
+                <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}" [class.text-center]="col.type === 'boolean'">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-row let-columns="columns">
+            <tr>
+                <td class="text-center">
+                    <p-button icon="pi pi-times" (click)="delete(row)" severity="danger" title="Delete" />
+                    <p-button icon="pi pi-expand" title="Details" (click)="open(row)" />
+                </td>
+                <td *ngFor="let col of columns" [class.text-center]="col.type === 'boolean'" [ngSwitch]="col.type">
+                    <div *ngSwitchCase="'boolean'">
+                        <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" inputId="binary" disabled="true" />
+                    </div>
+                    <div *ngSwitchCase="'number'">{{ row[col.field] | number }}</div>
+                    <div *ngSwitchCase="'date'">{{ row[col.field] | date: "shortDate" }}</div>
+                    <div *ngSwitchDefault>{{ row[col.field] }}</div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>

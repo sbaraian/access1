@@ -29,7 +29,7 @@ import { PayorService } from "../payor-view/payor.service";
 import { PayorAddressComponent } from "./payor-address.component";
 
 @Component({
-    selector: "app-payors",
+    selector: "app-payor",
     standalone: true,
     imports: [
         ButtonGroupModule,
@@ -116,7 +116,11 @@ export class PayorComponent implements OnInit {
 
     openContact = (contact: IPayorContact | null): void => {
         const header = contact === null ? "New Contact" : `${contact.firstName} ${contact.lastName}`;
-        this.ref = this.dialogService.open(PayorContactComponent, { width: "50vw", modal: true, header: header, data: { contact: { ...contact } } });
+        if (!this.payor.payorId) {
+            this.messageService.add({ severity: "error", summary: "Error", detail: "Please save the payor first", life: 3000, key: "payor" });
+            return;
+        }
+        this.ref = this.dialogService.open(PayorContactComponent, { width: "50vw", modal: true, header: header, data: { contact: { ...contact, payorId: this.payor.payorId } } });
         this.ref.onClose.subscribe((result: IPayorContact) => {
             if (result) {
                 if (contact === null) {
@@ -130,6 +134,10 @@ export class PayorComponent implements OnInit {
 
     openAddress = (address: IPayorAddress | null): void => {
         const header = address === null ? `New Address for ${this.payor.name}` : `Address for ${this.payor.name}`;
+        if (!this.payor.payorId) {
+            this.messageService.add({ severity: "error", summary: "Error", detail: "Please save the payor first", life: 3000, key: "payor" });
+            return;
+        }
         this.ref = this.dialogService.open(PayorAddressComponent, { width: "50vw", modal: true, header: header, data: { address: { ...address } } });
         this.ref.onClose.subscribe((result: IPayorAddress) => {
             if (result) {

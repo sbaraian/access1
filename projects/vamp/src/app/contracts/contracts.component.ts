@@ -19,10 +19,12 @@ import { combineLatest } from "rxjs";
 import { tap } from "rxjs/operators";
 
 import { AppService } from "../app.service";
-import { IClient } from "../models/client";
+import { ClientService } from "../client-view/client.service";
+import { IClient, createClient, createProduct } from "../models/client";
 import { IColumn, IOption } from "../models/option";
 import { IPayor, createPayor } from "../models/payor";
 import { PayorService } from "../payor-view/payor.service";
+import { utils } from "../utils";
 import { IContract } from "./contract";
 import { ContractComponent } from "./contract.component";
 import { ContractsService } from "./contracts.service";
@@ -37,6 +39,7 @@ import { ContractsService } from "./contracts.service";
 })
 export class ContractsComponent implements OnInit {
     private appService = inject(AppService);
+    private clientService = inject(ClientService);
     private payorService = inject(PayorService);
     private contractsService = inject(ContractsService);
     private router = inject(Router);
@@ -113,6 +116,7 @@ export class ContractsComponent implements OnInit {
     years: number[] = [];
     accountManagers: IOption[] = [];
     currentAccountManager: IOption | null = null;
+    getValue = utils.getValue;
 
     open = (row: IContract) => {
         ContractsService.contractId = row.contractId;
@@ -126,14 +130,6 @@ export class ContractsComponent implements OnInit {
         //this.router.navigate(["contracts", id]);
     };
 
-    getValue = (row: any, field: string): any => {
-        const fields = field.split(".");
-        let val = row;
-        for (var i = 0; i < fields.length; i++) {
-            val = val[fields[i]];
-        }
-        return val;
-    };
     reset = () => {
         if (this.clients.length) this.clientCtrl.setValue(this.clients[0]);
         if (this.payors.length) this.payorsCtrl.setValue(this.payors[0].payorId);
@@ -168,17 +164,17 @@ export class ContractsComponent implements OnInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        this.appService
-            .getClients()
+        this.clientService
+            .getClients(true, false)
             .pipe(
                 tap((data: IClient[]) => {
                     data = [
-                        { clientId: 0, name: "all", products: [{ productId: 0, name: "all" }] },
+                        createClient({ clientId: 0, name: "all", products: [{ productId: 0, name: "all" }] }),
                         ...data.map((client) => {
                             if (client.products) {
-                                client.products.unshift({ productId: 0, name: "all" });
+                                client.products.unshift(createProduct({ productId: 0, name: "all" }));
                             } else {
-                                client.products = [{ productId: 0, name: "all" }];
+                                client.products = [createProduct({ productId: 0, name: "all" })];
                             }
                             return client;
                         }),

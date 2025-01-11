@@ -1,0 +1,126 @@
+<p-toast position="bottom-right" key="product" />
+<p-card>
+    <div class="field grid mt-3">
+        <label for="name" style="width: 100px" class="font-semibold">Name</label>
+        <div class="col-12 md:col-10">
+            <input id="name" pInputText type="text" pInputText class="w-full" [(ngModel)]="product!.name" />
+        </div>
+    </div>
+    <div class="field grid mt-3">
+        <label for="description" style="width: 100px" class="font-semibold">Description</label>
+        <div class="col-12 md:col-10">
+            <input id="description" pInputText type="text" pInputText class="w-full" [(ngModel)]="product!.description" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="isActive" style="width: 100px" class="font-semibold">Active</label>
+        <div class="col-12 md:col-10">
+            <p-checkbox [binary]="true" inputId="isActive" class="w-full" [(ngModel)]="product!.isActive" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="therapeuticCategory" style="width: 100px" class="font-semibold">Therapeutic Category</label>
+        <div class="col-12 md:col-10 flex">
+            <div class="flex-grow-1">
+                <p-dropdown inputId="therapeuticCategory" [options]="therapeuticCategories" optionLabel="name" optionValue="therapeuticCategoryId" [(ngModel)]="product!.therapeuticCategoryId" styleClass="w-full" />
+            </div>
+            <div>
+                <p-splitButton label="Edit" (onClick)="openTherapeuticCategory(false)" [model]="items" />
+            </div>
+        </div>
+    </div>
+    <div class="field grid">
+        <p-card>
+            <p-table
+                [columns]="selectedColumns"
+                [value]="product.productDetails"
+                styleClass="p-datatable-striped"
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [scrollable]="true"
+                scrollHeight="flex"
+                sortField="ndc"
+                [sortOrder]="-1"
+                selectionMode="single"
+                dataKey="clientContractId"
+                [rowsPerPageOptions]="[5, 10, 20]"
+                [paginator]="true"
+                [rows]="5"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                paginatorStyleClass="justify-content-end"
+            >
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between">
+                        Products
+                        <p-button label="Add" icon="pi pi-plus" class="mr-1" [raised]="true" [text]="true" (click)="openProductDetail(null)" />
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                    <tr>
+                        <th style="width: 120px" class="text-center">
+                            <p-button (onClick)="op.toggle($event)" title="Select columns" icon="pi pi-bars" />
+                            <p-overlayPanel #op><p-multiSelect [options]="cols" [formControl]="selectedColumnsCtrl" optionLabel="header" placeholder="Please select columns"> </p-multiSelect></p-overlayPanel>
+                        </th>
+                        <th *ngFor="let col of columns" pSortableColumn="{{ col.field }}" [class.text-center]="col.type === 'boolean'">{{ col.header }}<p-sortIcon field="{{ col.field }}" /></th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row let-columns="columns" let-idx="rowIndex">
+                    <tr>
+                        <td class="text-center">
+                            <p-button icon="pi pi-times" (click)="deleteProductDetail(row, idx)" severity="danger" title="Delete" />
+                            <p-button icon="pi pi-expand" title="Details" (click)="openProductDetail(row)" />
+                        </td>
+                        <td *ngFor="let col of columns" [class.text-center]="col.type === 'boolean'" [ngSwitch]="col.type">
+                            <div *ngSwitchCase="'boolean'">
+                                <p-checkbox [(ngModel)]="row[col.field]" [binary]="true" inputId="binary" disabled="true" />
+                            </div>
+                            <div *ngSwitchDefault>{{ row[col.field] }}</div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </p-card>
+    </div>
+    <p-divider />
+    <div class="text-right">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (onClick)="save()" />
+    </div>
+</p-card>
+<p-dialog [header]="therapeuticCategory!.therapeuticCategoryId ? 'Edit Therapeutic Category' : 'New Therapeutic Category'" [modal]="true" [(visible)]="visibleTherapeuticCategory" [style]="{ width: '50rem' }">
+    <p-card>
+        <div class="field grid mt-3">
+            <label for="name" class="font-semibold w-6rem">Name</label>
+            <input pInputText id="name" class="flex-auto" autocomplete="off" [(ngModel)]="therapeuticCategory!.name" />
+        </div>
+        <p-divider />
+        <div class="text-right">
+            <p-button label="Save" [outlined]="true" severity="primary" (onClick)="saveTherapeuticCategory()" />
+        </div>
+    </p-card>
+</p-dialog>
+<p-dialog [header]="productDetail!.productDetailId ? 'Edit Product Detail' : 'New  Product Detail'" [modal]="true" [(visible)]="visibleProductDetail" [style]="{ width: '50rem' }">
+    <p-card>
+        <div class="field grid mt-3">
+            <label for="ndc" class="font-semibold w-6rem">NDC</label>
+            <input pInputText id="ndc" class="flex-auto" autocomplete="off" [(ngModel)]="productDetail!.ndc" />
+        </div>
+        <div class="field grid mt-3">
+            <label for="package1" class="font-semibold w-6rem">Package 1</label>
+            <input pInputText id="package1" class="flex-auto" autocomplete="off" [(ngModel)]="productDetail!.package1" />
+        </div>
+        <div class="field grid mt-3">
+            <label for="package2" class="font-semibold w-6rem">Package 2</label>
+            <input pInputText id="package2" class="flex-auto" autocomplete="off" [(ngModel)]="productDetail!.package2" />
+        </div>
+        <div class="field grid mt-3">
+            <label for="package3" class="font-semibold w-6rem">Package 3</label>
+            <input pInputText id="package1" class="flex-auto" autocomplete="off" [(ngModel)]="productDetail!.package3" />
+        </div>
+        <p-divider />
+        <div class="text-right">
+            <p-button label="Save" [outlined]="true" severity="primary" (onClick)="saveProductDetail()" />
+        </div>
+    </p-card>
+</p-dialog>
+<app-confirm-dialog-headless [accept]="acceptLabel" [reject]="rejectLabel"></app-confirm-dialog-headless>

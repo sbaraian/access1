@@ -30,13 +30,13 @@ import { catchError, combineLatest, EMPTY, of } from "rxjs";
 import { filter, switchMap, tap } from "rxjs/operators";
 
 import { AppService } from "../app.service";
+import { ClientService } from "../client-view/client.service";
 import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
-import { IClient } from "../models/client";
+import { createClient, IClient } from "../models/client";
 import { IColumn, IOption } from "../models/option";
 import { createPayorContact, IFormulary, IPayor, IPayorActionPlan, IPayorContact, IPayorContractTracking, IPayorNote, IPayorProduct, IPayorTherapeuticCategoryPolicy, IPayorWebsite, IProductTierCategory, ITherapeuticCategory } from "../models/payor";
 import { PayorContactComponent } from "../payor-contact/payor-contact.component";
 import { urlValidator } from "../validators/url-validator";
-import { ClientService } from "./client.service";
 import { PayorService } from "./payor.service";
 @Component({
     selector: "app-payor-view",
@@ -217,12 +217,12 @@ export class PayorViewComponent implements OnInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        this.appService
-            .getClients()
+        this.clientService
+            .getClients(true, false)
             .pipe(
                 tap((data: IClient[]) => {
                     this.clients = data;
-                    data = [{ clientId: 0, name: "all", products: [{ productId: 0, name: "all" }] }, ...data];
+                    data = [createClient({ clientId: 0, name: "all", products: [{ productId: 0, name: "all" }] }), ...data];
                     this.clientsWithAll = data;
                     this.clientCtrl.setValue(0);
                 }),

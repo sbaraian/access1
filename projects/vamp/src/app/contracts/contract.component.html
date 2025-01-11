@@ -117,10 +117,8 @@
                     </p-floatLabel>
                 </div>
                 <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
-                    <p-floatLabel>
-                        <textarea [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
-                        <label for="comments">Comments/Notes</label>
-                    </p-floatLabel>
+                    <label>Comments/Notes</label>
+                    <p-editor [(ngModel)]="contract.notes" [style]="{ height: '100px' }" />
                 </div>
                 <p-panel styleClass="secondary-header" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)" [toggleable]="true">
                     <ng-template pTemplate="header">
@@ -475,7 +473,7 @@
                         <input pInputText [(ngModel)]="rebate.rebatePercentage" />
                     </p-inputGroup>
                 </td>
-                <td><input pInputText [(ngModel)]="rebate.otherFeeDescription" class="w-full" /></td>
+                <td><input pInputText [(ngModel)]="rebate.description" class="w-full" /></td>
                 <td><p-button icon="pi pi-trash" (click)="deleteRebate(exclusion, ri)" severity="danger" styleClass="no-print" /></td>
             </tr>
         </ng-template>

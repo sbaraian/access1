@@ -15,6 +15,7 @@ import { CheckboxModule } from "primeng/checkbox";
 import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from "primeng/dropdown";
 import { DialogService } from "primeng/dynamicdialog";
+import { EditorModule } from "primeng/editor";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { InputGroupModule } from "primeng/inputgroup";
 import { InputGroupAddonModule } from "primeng/inputgroupaddon";
@@ -29,6 +30,7 @@ import { BehaviorSubject, EMPTY, catchError, combineLatest, of } from "rxjs";
 import { distinctUntilChanged, switchMap, tap } from "rxjs/operators";
 
 import { AppService } from "../app.service";
+import { ClientService } from "../client-view/client.service";
 import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
 import { IChannel, IClient, IProduct } from "../models/client";
 import { IOption } from "../models/option";
@@ -68,6 +70,7 @@ export interface IProductChannelOption {
         TabViewModule,
         ToastModule,
         TriStateCheckboxModule,
+        EditorModule,
     ],
     templateUrl: "./contract.component.html",
     styleUrl: "./contract.component.scss",
@@ -75,6 +78,7 @@ export interface IProductChannelOption {
 })
 export class ContractComponent implements OnInit {
     private appService = inject(AppService);
+    private clientService = inject(ClientService);
     private payorService = inject(PayorService);
     private contractsService = inject(ContractsService);
     private destroyRef = inject(DestroyRef);
@@ -584,7 +588,7 @@ export class ContractComponent implements OnInit {
                     return EMPTY;
                 }),
             ),
-            clients: this.appService.getClients(),
+            clients: this.clientService.getClients(true, false),
             payors: this.payorService.getPayors(),
             accountManagers: this.appService.getAccountManagers(),
             currentAccountManager: this.appService.getCurrentAccountManager(),

@@ -10,4 +10,12 @@ export const utils = {
             return null;
         }
     },
+    getValue(row: any, field: string): any {
+        const fields = field.split(".");
+        let val = row;
+        for (var i = 0; i < fields.length; i++) {
+            val = val[fields[i]];
+        }
+        return val;
+    },
 };

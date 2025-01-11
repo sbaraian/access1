@@ -169,6 +169,11 @@ export class AppComponent implements OnInit {
                         label: "Payors",
                         route: "/payors",
                     },
+                    {
+                        icon: "pi pi-briefcase",
+                        label: "Clients",
+                        route: "/clients",
+                    },
                 ],
             },
         ];

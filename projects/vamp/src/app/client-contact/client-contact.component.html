@@ -1,27 +1,15 @@
-<p-toast position="bottom-right" key="payorContact" />
+<p-toast position="bottom-right" key="clientContact" />
 <p-card>
     <div class="field grid mt-3">
-        <label for="firstName" style="width: 100px" class="font-semibold">First Name</label>
+        <label for="firstName" style="width: 100px" class="font-semibold">Name</label>
         <div class="col-12 md:col-10">
-            <input id="firstName" pInputText type="text" pInputText class="w-full" [(ngModel)]="contact!.firstName" />
-        </div>
-    </div>
-    <div class="field grid">
-        <label for="lastName" style="width: 100px" class="font-semibold">Last Name</label>
-        <div class="col-12 md:col-10">
-            <input id="lastName" pInputText type="text" pInputText class="w-full" [(ngModel)]="contact!.lastName" />
+            <input id="firstName" pInputText type="text" pInputText class="w-full" [(ngModel)]="contact!.name" />
         </div>
     </div>
     <div class="field grid">
         <label for="title" style="width: 100px" class="font-semibold">Title</label>
         <div class="col-12 md:col-10">
             <input id="title" pInputText type="text" pInputText class="w-full" [(ngModel)]="contact!.title" />
-        </div>
-    </div>
-    <div class="field grid">
-        <label for="jobFunction" style="width: 100px" class="font-semibold">Job Function</label>
-        <div class="col-12 md:col-10">
-            <input id="jobFunction" pInputText type="text" pInputText class="w-full" [(ngModel)]="contact!.jobFunction" />
         </div>
     </div>
     <div class="field grid">
@@ -43,13 +31,35 @@
         </div>
     </div>
     <div class="field grid">
+        <label for="address" style="width: 100px" class="font-semibold">Address</label>
+        <div class="col-12 md:col-10">
+            <input pInputText type="text" inputId="address" class="w-full" [(ngModel)]="contact!.address" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="city" style="width: 100px" class="font-semibold">City</label>
+        <div class="col-12 md:col-10">
+            <input pInputText type="text" inputId="city" class="w-full" [(ngModel)]="contact!.city" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="state" style="width: 100px" class="font-semibold">State</label>
+        <div class="col-12 md:col-10">
+            <input pInputText type="text" inputId="state" class="w-full" [(ngModel)]="contact!.state" />
+        </div>
+    </div>
+    <div class="field grid">
+        <label for="zip" style="width: 100px" class="font-semibold">Zip</label>
+        <div class="col-12 md:col-10">
+            <input pInputText type="text" inputId="zip" class="w-full" [(ngModel)]="contact!.zip" />
+        </div>
+    </div>
+    <div class="field grid">
         <div class="col-6 md:col-5">
-            <label for="vip" style="width: 100px" class="font-semibold">Vip</label>
-            <p-checkbox [binary]="true" inputId="vip" class="w-full" [(ngModel)]="contact!.vip" />
+            <p-checkbox [binary]="true" inputId="vip" class="w-full" [(ngModel)]="contact!.vip" label="Vip" />
         </div>
         <div class="col-6 md:col-5">
-            <label for="isActive" style="width: 100px" class="font-semibold">Active</label>
-            <p-checkbox [binary]="true" inputId="isActive" class="w-full" [(ngModel)]="contact!.isActive" />
+            <p-checkbox [binary]="true" inputId="isActive" class="w-full" [(ngModel)]="contact!.isActive" label="Active" />
         </div>
     </div>
     <p-divider />

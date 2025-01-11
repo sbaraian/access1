@@ -31,7 +31,11 @@ export class PayorService {
     };
 
     saveContact = (contact: IPayorContact): Observable<IPayorContact> => {
-        return this.http.put<IPayorContact>(`api/payorContacts/putPayorContact/${contact.payorContactId}`, contact);
+        if (contact.payorContactId) {
+            return this.http.put<IPayorContact>(`api/payorContacts/putPayorContact/${contact.payorContactId}`, contact);
+        } else {
+            return this.http.post<IPayorContact>(`api/payorContacts/postPayorContact`, contact);
+        }
     };
 
     delete = (payor: IPayor): Observable<any> => {

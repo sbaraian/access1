@@ -14,23 +14,23 @@ import { ToastModule } from "primeng/toast";
 import { BehaviorSubject, EMPTY } from "rxjs";
 import { catchError, switchMap, tap } from "rxjs/operators";
 
+import { ClientService } from "../client-view/client.service";
 import { ConfirmDialogHeadless } from "../confirm-dialog-headless/confirm-dialog-headless.component";
+import { createClient, IClient } from "../models/client";
 import { IColumn } from "../models/option";
-import { createPayor, IPayor } from "../models/payor";
-import { PayorService } from "../payor-view/payor.service";
-import { PayorComponent } from "./payor.component";
+import { ClientComponent } from "./client.component";
 @Component({
-    selector: "app-payors",
+    selector: "app-clients",
     standalone: true,
     imports: [ButtonGroupModule, ButtonModule, CheckboxModule, CommonModule, ConfirmDialogHeadless, DynamicDialogModule, FormsModule, MultiSelectModule, OverlayPanelModule, TableModule, ToastModule, ReactiveFormsModule],
-    templateUrl: "./payors.component.html",
-    styleUrl: "./payors.component.scss",
+    templateUrl: "./clients.component.html",
+    styleUrl: "./clients.component.scss",
     providers: [ConfirmationService, DialogService, MessageService],
 })
-export class PayorsComponent implements OnInit {
+export class ClientsComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     dialogService = inject(DialogService);
-    private payorService = inject(PayorService);
+    private clientService = inject(ClientService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
     ref: DynamicDialogRef | undefined;
@@ -41,34 +41,30 @@ export class PayorsComponent implements OnInit {
     cols: IColumn[] = [
         { field: "name", header: "Name" },
         { field: "isActive", header: "Active", type: "boolean" },
-        { field: "isPbm", header: "PBM", type: "boolean" },
-        { field: "isMco", header: "MCO", type: "boolean" },
-        { field: "isMedD", header: "Med D", type: "boolean" },
-        { field: "isMedFfs", header: "Medicaid FFS", type: "boolean" },
-        { field: "isMedManaged", header: "Medicaid Managed", type: "boolean" },
-        { field: "mmitPbm", header: "Mmit PBM", type: "boolean" },
-        { field: "accountManager", header: "Account Manager" },
-        { field: "secondAccountManager", header: "Second Account Manager" },
-        { field: "totalLives", header: "Total Lives", type: "number" },
-        { field: "description", header: "Description" },
-        { field: "type", header: "Type" },
+        { field: "contractDate", header: "Contract Date", type: "date" },
+        { field: "address1", header: "Address 1" },
+        { field: "address2", header: "Address 2" },
+        { field: "city", header: "City" },
+        { field: "state", header: "State" },
+        { field: "zip", header: "Zip" },
+        { field: "phone", header: "Phone" },
     ];
-    payors: IPayor[] = [];
+    clients: IClient[] = [];
     refresh$ = new BehaviorSubject(true);
 
-    delete = (payor: IPayor) => {
+    delete = (client: IClient) => {
         this.confirmationService.confirm({
-            header: `Are you sure you want to delete ${payor.name}?`,
+            header: `Are you sure you want to delete ${client.name}?`,
             message: "Please confirm to proceed.",
             accept: () => {
-                this.payorService
-                    .delete(payor)
+                this.clientService
+                    .delete(client)
                     .pipe(
                         tap(() => {
-                            this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000, key: "payors" });
+                            this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000, key: "clients" });
                         }),
                         catchError((err) => {
-                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "payors" });
+                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "clients" });
                             return EMPTY;
                         }),
                         takeUntilDestroyed(this.destroyRef),
@@ -78,21 +74,21 @@ export class PayorsComponent implements OnInit {
         });
     };
 
-    open = (payor: IPayor | null): void => {
-        const header = payor === null ? "New Payor" : payor.name;
-        if (payor === null) {
-            payor = createPayor({});
+    open = (client: IClient | null): void => {
+        const header = client === null ? "New Client" : client.name;
+        if (client === null) {
+            client = createClient({});
         }
-        this.ref = this.dialogService.open(PayorComponent, {
+        this.ref = this.dialogService.open(ClientComponent, {
             width: "95vw",
             height: "100vh",
             modal: true,
             header: header,
             data: {
-                payor: payor,
+                client: client,
             },
         });
-        this.ref.onClose.subscribe((result: IPayor) => {
+        this.ref.onClose.subscribe((result: IClient) => {
             if (result) {
                 this.refresh$.next(true);
             }
@@ -114,14 +110,14 @@ export class PayorsComponent implements OnInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        this.selectedColumnsCtrl.setValue([...this.cols.slice(0, 7)]);
+        this.selectedColumnsCtrl.setValue([...this.cols]);
 
         this.refresh$
             .pipe(
                 switchMap((_) =>
-                    this.payorService.getPayors().pipe(
+                    this.clientService.getClients().pipe(
                         tap((data) => {
-                            this.payors = data;
+                            this.clients = data;
                         }),
                     ),
                 ),
