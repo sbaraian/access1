@@ -25,8 +25,8 @@ import { IColumn, IOption } from "../models/option";
 import { IPayor, createPayor } from "../models/payor";
 import { PayorService } from "../payor-view/payor.service";
 import { utils } from "../utils";
-import { IContract } from "./contract";
-import { ContractComponent } from "./contract.component";
+import { IContract, createContract } from "./contract";
+import { ContractComponent, LocalStorageKeyContract } from "./contract.component";
 import { ContractsService } from "./contracts.service";
 
 @Component({
@@ -113,7 +113,7 @@ export class ContractsComponent implements OnInit {
         { id: 1, name: "Active" },
         { id: 2, name: "Inactive " },
     ];
-    years: number[] = [];
+    years: string[] = ["All"];
     accountManagers: IOption[] = [];
     currentAccountManager: IOption | null = null;
     getValue = utils.getValue;
@@ -127,7 +127,11 @@ export class ContractsComponent implements OnInit {
             modal: true,
             header: `${row.client?.name} | ${row.payor?.name} | ${row.accountDirector?.name}`,
         });
-        //this.router.navigate(["contracts", id]);
+        this.ref.onClose.subscribe((data: any) => {
+            localStorage.removeItem(LocalStorageKeyContract);
+            this.inProgress = "";
+            this.generate();
+        });
     };
 
     reset = () => {
@@ -138,18 +142,37 @@ export class ContractsComponent implements OnInit {
         if (this.contractStatuses.length) this.contractStatusCtrl.setValue(this.contractStatuses[0]);
         if (this.activeStatuses.length) this.activeCtrl.setValue(this.activeStatuses[0].id);
         if (this.daysUntilRenewals.length) this.daysUntilRenewalCtrl.setValue(this.daysUntilRenewals[0]);
-        if (this.years.length) this.yearsCtrl.setValue(this.years[0]);
+        this.yearsCtrl.setValue(DateTime.now().year);
         if (this.accountManagers.length) {
             this.accountManagerCtrl.setValue(this.currentAccountManager ? this.currentAccountManager : this.accountManagers[0]);
         }
     };
-
+    inProgress = "";
+    inProgressContract: IContract = createContract({});
+    checkLocalStorageKey = (): void => {
+        const contractsString = localStorage.getItem(LocalStorageKeyContract);
+        if (!!contractsString) {
+            const contracts: IContract[] | null = utils.tryParseJSON(contractsString);
+            if (contracts && contracts.length > 0) {
+                this.inProgressContract = { ...contracts![0], contractId: -1 };
+                if (contracts![0].contractId > 0) {
+                    this.inProgress = `Contract ${contracts![0].contractId} in progress`;
+                } else {
+                    this.inProgress = `New Contract in progress`;
+                }
+            }
+        }
+    };
+    openPending = (): void => {
+        this.open(this.inProgressContract);
+    };
     ngOnInit() {
+        this.checkLocalStorageKey();
         this.appService
             .getTherapeuticCategories()
             .pipe(
                 tap((data) => {
-                    this.therapeuticAreas = [{ id: 0, name: "all" }, ...data.map((item) => ({ id: item.therapeuticCategoryId, name: item.name }))];
+                    this.therapeuticAreas = [{ id: 0, name: "All" }, ...data.map((item) => ({ id: item.therapeuticCategoryId, name: item.name }))];
                 }),
                 takeUntilDestroyed(this.destroyRef),
             )
@@ -158,7 +181,7 @@ export class ContractsComponent implements OnInit {
             .getPayors()
             .pipe(
                 tap((data) => {
-                    data.unshift(createPayor({ payorId: 0, name: "all" }));
+                    data.unshift(createPayor({ payorId: 0, name: "All" }));
                     this.payors = data;
                 }),
                 takeUntilDestroyed(this.destroyRef),
@@ -169,12 +192,12 @@ export class ContractsComponent implements OnInit {
             .pipe(
                 tap((data: IClient[]) => {
                     data = [
-                        createClient({ clientId: 0, name: "all", products: [{ productId: 0, name: "all" }] }),
+                        createClient({ clientId: 0, name: "All", products: [{ productId: 0, name: "All" }] }),
                         ...data.map((client) => {
                             if (client.products) {
-                                client.products.unshift(createProduct({ productId: 0, name: "all" }));
+                                client.products.unshift(createProduct({ productId: 0, name: "All" }));
                             } else {
-                                client.products = [createProduct({ productId: 0, name: "all" })];
+                                client.products = [createProduct({ productId: 0, name: "All" })];
                             }
                             return client;
                         }),
@@ -191,6 +214,7 @@ export class ContractsComponent implements OnInit {
             { field: "client.name", header: "Client" },
             { field: "payor.name", header: "Payor" },
             { field: "accountDirector.name", header: "Account Director" },
+            { field: "hasAmendments", header: "Has Amendments" },
         ];
         this.selectedColumnsCtrl.valueChanges
             .pipe(
@@ -202,7 +226,7 @@ export class ContractsComponent implements OnInit {
         combineLatest({ accountManagers: this.appService.getAccountManagers(), currentAccountManager: this.appService.getCurrentAccountManager() })
             .pipe(
                 tap((data: { accountManagers: IOption[]; currentAccountManager: { accountManagerId: string; name: string } }) => {
-                    data.accountManagers.unshift({ id: "", name: "all" });
+                    data.accountManagers.unshift({ id: "", name: "All" });
                     this.accountManagers = data.accountManagers;
                     if (data.currentAccountManager) {
                         const accountManager = data.accountManagers.find((item) => item.id === data.currentAccountManager.accountManagerId);
@@ -219,12 +243,10 @@ export class ContractsComponent implements OnInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();
-        for (var year = DateTime.now().year + 1; year >= 2024; year--) {
-            this.years.push(year);
+        for (var year = DateTime.now().year + 1; year >= 2019; year--) {
+            this.years.push(year.toString());
         }
-        if (this.years.length) {
-            this.yearsCtrl.setValue(this.years[1]);
-        }
+        this.yearsCtrl.setValue(this.years[0]);
         this.contractStatusCtrl.setValue(this.contractStatuses[0]);
         this.daysUntilRenewalCtrl.setValue(this.daysUntilRenewals[0]);
         this.clientCtrl.valueChanges
@@ -249,10 +271,12 @@ export class ContractsComponent implements OnInit {
                 this.contractStatusCtrl.value.id,
                 this.daysUntilRenewalCtrl.value.days,
                 this.activeCtrl.value!,
-                this.yearsCtrl.value,
+                this.yearsCtrl.value === "All" ? null : this.yearsCtrl.value,
             )
             .pipe(
-                tap((data) => (this.data = data)),
+                tap((data) => {
+                    this.data = data.map((item) => ({ ...item, hasAmendments: item.hasAmendments ? "Yes" : "No" }));
+                }),
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe();

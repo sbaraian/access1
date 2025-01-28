@@ -70,6 +70,7 @@
                     <div class="flex flex-grow-1 justify-content-end flex-wrap gap-2 mt-3">
                         <div>
                             <p-buttonGroup class="gap-1">
+                                <p-button [label]="inProgress" icon="pi pi-wrench" class="mr-1" (click)="openPending()" [link]="true" *ngIf="!!inProgress" />
                                 <p-button label="Reset" icon="pi pi-refresh" class="mr-1" [raised]="true" [text]="true" (click)="reset()" />
                                 <p-button label="Generate" icon="pi pi-objects-column" class="mr-1" [raised]="true" [text]="true" (click)="generate()" />
                             </p-buttonGroup>

@@ -1,5 +1,5 @@
 import { CommonModule } from "@angular/common";
-import { Component, DestroyRef, ElementRef, Input, OnInit, ViewChild, inject } from "@angular/core";
+import { Component, DestroyRef, ElementRef, Input, OnInit, Optional, ViewChild, inject } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ActivatedRoute } from "@angular/router";
@@ -14,17 +14,19 @@ import { CardModule } from "primeng/card";
 import { CheckboxModule } from "primeng/checkbox";
 import { DialogModule } from "primeng/dialog";
 import { DropdownModule } from "primeng/dropdown";
-import { DialogService } from "primeng/dynamicdialog";
+import { DynamicDialogRef } from "primeng/dynamicdialog";
 import { EditorModule } from "primeng/editor";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { InputGroupModule } from "primeng/inputgroup";
 import { InputGroupAddonModule } from "primeng/inputgroupaddon";
+import { InputMaskModule } from "primeng/inputmask";
 import { InputTextModule } from "primeng/inputtext";
 import { InputTextareaModule } from "primeng/inputtextarea";
 import { PanelModule } from "primeng/panel";
 import { TableModule } from "primeng/table";
 import { TabViewModule } from "primeng/tabview";
 import { ToastModule } from "primeng/toast";
+import { ToolbarModule } from "primeng/toolbar";
 import { TriStateCheckboxModule } from "primeng/tristatecheckbox";
 import { BehaviorSubject, EMPTY, catchError, combineLatest, of } from "rxjs";
 import { distinctUntilChanged, switchMap, tap } from "rxjs/operators";
@@ -36,14 +38,15 @@ import { IChannel, IClient, IProduct } from "../models/client";
 import { IOption } from "../models/option";
 import { IPayor } from "../models/payor";
 import { PayorService } from "../payor-view/payor.service";
+import { utils } from "../utils";
 import { IContract, IContractNote, IPrefBrands, IProductChannel, createContract, createPpa, createProductChannel, createProductChannelPrefBrand } from "./contract";
 import { ContractLengthPipe } from "./contract-length.pipe";
 import { ContractsService } from "./contracts.service";
-
 export interface IProductChannelOption {
     name: string;
     value: { productId: number; channelId: number; name: string };
 }
+export const LocalStorageKeyContract = "selected-contract";
 @Component({
     selector: "app-contract",
     standalone: true,
@@ -58,10 +61,12 @@ export interface IProductChannelOption {
         ContractLengthPipe,
         DialogModule,
         DropdownModule,
+        EditorModule,
         FloatLabelModule,
         FormsModule,
         InputGroupAddonModule,
         InputGroupModule,
+        InputMaskModule,
         InputTextareaModule,
         InputTextModule,
         PanelModule,
@@ -70,11 +75,11 @@ export interface IProductChannelOption {
         TabViewModule,
         ToastModule,
         TriStateCheckboxModule,
-        EditorModule,
+        ToolbarModule,
     ],
     templateUrl: "./contract.component.html",
     styleUrl: "./contract.component.scss",
-    providers: [MessageService, ConfirmationService, DialogService],
+    providers: [MessageService, ConfirmationService],
 })
 export class ContractComponent implements OnInit {
     private appService = inject(AppService);
@@ -84,7 +89,6 @@ export class ContractComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
-    private dialogService = inject(DialogService);
     private route = inject(ActivatedRoute);
     contractId$ = new BehaviorSubject<number>(0);
 
@@ -116,6 +120,7 @@ export class ContractComponent implements OnInit {
 
     payors: IPayor[] = [];
     contract: IContract = createContract();
+    contracts: IContract[] = [];
     channels: IChannel[] = [
         { id: 1, name: "Commercial" },
         { id: 7, name: "Commercial Government" },
@@ -158,15 +163,78 @@ export class ContractComponent implements OnInit {
         },
     ];
     inReviewEntities = ["Viking", "Manufacturer", "Payer"];
-    isAmendment = false;
     notes: IContractNote[] = [];
     @ViewChild("contentToPrint", { static: false }) contentToPrint: ElementRef | null = null;
     isPrinting = false;
+    contractIndex = 0;
+
+    previousContracts = "";
+
+    constructor(@Optional() private dialogRef: DynamicDialogRef) {}
+
+    onFormChange = (value: any): void => {
+        this.saveToLocalStorage();
+    };
+    saveToLocalStorage = (): void => {
+        setTimeout(() => {
+            let newContracts = utils.tryParseJSON<IContract[]>(JSON.stringify(this.contracts));
+            newContracts = newContracts!.map((item: IContract) => this.formatContractDates(item));
+            const json = JSON.stringify(newContracts);
+            localStorage.setItem(LocalStorageKeyContract, json);
+        }, 1000);
+    };
+    clearLocalStorage = (): void => {
+        setTimeout(() => {
+            localStorage.removeItem(LocalStorageKeyContract);
+            this.previousContracts = JSON.stringify(this.contracts);
+        }, 1000);
+    };
+
+    selectContract = (index: number) => {
+        if (index < this.contracts.length) {
+            const hasLocalStorage = !!localStorage.getItem(LocalStorageKeyContract);
+            this.contract = this.contracts[index];
+            this.contractIndex = index;
+
+            if (this.contract.client) {
+                const client = this.clients.find((item: IClient) => item.clientId === this.contract.client!.clientId);
+                if (client) {
+                    this.clientCtrl.setValue(client);
+                }
+            }
+            if (this.contract.payor) {
+                const payor = this.payors.find((item: IPayor) => item.payorId === this.contract.payor!.payorId);
+                if (payor) {
+                    this.payorCtrl.setValue(payor);
+                }
+            }
+
+            if (this.contract.accountDirector?.id) {
+                const accountManager = this.accountManagers.find((item: IOption) => item.id === this.contract.accountDirector?.id);
+                if (accountManager) {
+                    this.accountManagerCtrl.setValue(accountManager);
+                }
+            }
+            this.populateProductChannels();
+            this.changeProductChannel(-1);
+            if (!!this.contract.client?.clientId) {
+                if (this.contract.productChannels.length) {
+                    this.contract.productChannels.forEach((item) => {
+                        const pc = this.productChannels.find((elem) => elem.value.productId === item.productId && elem.value.channelId === item.channelId);
+                        item.value = pc?.value;
+                    });
+                }
+            }
+            if (!hasLocalStorage) {
+                this.clearLocalStorage();
+            }
+        }
+    };
 
     print = (): void => {
         const contractId = this.contractId$.getValue();
         if (contractId) {
-            window.open(`/#/contracts/${contractId}?isPrinting=true`, "_blank");
+            window.open(`/home/indexNew//#/contracts/${contractId}?isPrinting=true`, "_blank");
         }
     };
 
@@ -246,77 +314,102 @@ export class ContractComponent implements OnInit {
             this.notes.splice(idx, 1);
         }
     };
+    formatContractDates = (contract: any): any => {
+        if (contract.loi && contract.loi.length > 10) {
+            contract.loi = DateTime.fromISO(contract.loi).toFormat("MM/dd/yyyy");
+        }
+        if (contract.contractNegotiationInitiated && contract.contractNegotiationInitiated.length > 10) {
+            contract.contractNegotiationInitiated = DateTime.fromISO(contract.contractNegotiationInitiated).toFormat("MM/dd/yyyy");
+        }
+        if (contract.viking && contract.viking.length > 10) {
+            contract.viking = DateTime.fromISO(contract.viking).toFormat("MM/dd/yyyy");
+        }
+        if (contract.manufacturer && contract.manufacturer.length > 10) {
+            contract.manufacturer = DateTime.fromISO(contract.manufacturer).toFormat("MM/dd/yyyy");
+        }
+        if (contract.payer && contract.payer.length > 10) {
+            contract.payer = DateTime.fromISO(contract.payer).toFormat("MM/dd/yyyy");
+        }
+        if (contract.contractExecuted && contract.contractExecuted.length > 10) {
+            contract.contractExecuted = DateTime.fromISO(contract.contractExecuted).toFormat("MM/dd/yyyy");
+        }
+
+        contract.productChannels.forEach((productChannel: any) => {
+            if (productChannel.effectiveDate && productChannel.effectiveDate.length > 10) {
+                productChannel.effectiveDate = DateTime.fromISO(productChannel.effectiveDate).toFormat("MM/dd/yyyy");
+            }
+            if (productChannel.endDate && productChannel.endDate.length > 10) {
+                productChannel.endDate = DateTime.fromISO(productChannel.endDate).toFormat("MM/dd/yyyy");
+            }
+
+            productChannel.ppas.forEach((ppa: any) => {
+                if (ppa.effectiveDate && ppa.effectiveDate.length > 10) {
+                    ppa.effectiveDate = DateTime.fromISO(ppa.effectiveDate).toFormat("MM/dd/yyyy");
+                }
+                if (ppa.endDate && ppa.endDate.length > 10) {
+                    ppa.endDate = DateTime.fromISO(ppa.endDate).toFormat("MM/dd/yyyy");
+                }
+            });
+        });
+        return contract;
+    };
+
+    formatContract = (contract: IContract): any => {
+        let newContract = utils.tryParseJSON<any>(JSON.stringify(contract));
+        if (!newContract) return newContract;
+        delete newContract.hasAmendments;
+        newContract = this.formatContractDates(newContract);
+        newContract.productChannels.forEach((productChannel: IProductChannel) => (productChannel.options = []));
+        newContract.contractNotes = this.notes.map((note) => ({ ...note, reviewDate: DateTime.fromJSDate(note.reviewDate as Date).toFormat("MM/dd/yyyy") }));
+        newContract.productChannels.forEach((productChannel: IProductChannel) => {
+            productChannel.productId = productChannel.value!.productId;
+            productChannel.channelId = productChannel.value!.channelId;
+            if ((productChannel.gpoEnterpriseFee + "").toLowerCase() === "sliding scale") {
+                productChannel.gpoEnterpriseFee = null;
+                productChannel.isGpoEnterpriseFeeSlidingScale = true;
+            }
+            /*
+            contract.productChannels[i].gpoEnterpriseFee + "").toLowerCase() !== "sliding scale"*/
+
+            productChannel.ppas.forEach((ppa: any) => {
+                ppa["isPpCapCpi"] = (ppa.ppCap + "").toLowerCase() === "cpi";
+                if (!ppa["isPpCapCpi"]) {
+                    delete ppa["threeYearAverage"];
+                } else {
+                    ppa.ppCap = null;
+                }
+            });
+
+            this.prefBrands.forEach((prefBrand) => {
+                if (!productChannel.prefBrands[prefBrand.field].isChecked) {
+                    delete productChannel.prefBrands[prefBrand.field];
+                }
+            });
+        });
+        newContract.accountDirector.userName = newContract.accountDirector.email = "n/a";
+        newContract.accountDirectorId = newContract.accountDirector.id;
+        newContract.clientId = newContract.client!.clientId;
+        newContract.payorId = newContract.payor!.payorId;
+        return newContract;
+    };
+
     save = () => {
         if (this.isValid()) {
-            const contract = JSON.parse(JSON.stringify(this.contract));
-            contract.productChannels.forEach((productChannel: IProductChannel) => (productChannel.options = []));
-            if (contract.loi) {
-                contract.loi = DateTime.fromISO(contract.loi).toFormat("MM/dd/yyyy");
-            }
-            if (contract.contractNegotiationInitiated) {
-                contract.contractNegotiationInitiated = DateTime.fromISO(contract.contractNegotiationInitiated).toFormat("MM/dd/yyyy");
-            }
-            if (contract.viking) {
-                contract.viking = DateTime.fromISO(contract.viking).toFormat("MM/dd/yyyy");
-            }
-            if (contract.manufacturer) {
-                contract.manufacturer = DateTime.fromISO(contract.manufacturer).toFormat("MM/dd/yyyy");
-            }
-            if (contract.payer) {
-                contract.payer = DateTime.fromISO(contract.payer).toFormat("MM/dd/yyyy");
-            }
-            if (contract.contractExecuted) {
-                contract.contractExecuted = DateTime.fromISO(contract.contractExecuted).toFormat("MM/dd/yyyy");
-            }
-            contract.contractNotes = this.notes.map((note) => ({ ...note, reviewDate: DateTime.fromJSDate(note.reviewDate as Date).toFormat("MM/dd/yyyy") }));
-            contract.productChannels.forEach((productChannel: any) => {
-                productChannel.productId = productChannel.value.productId;
-                productChannel.channelId = productChannel.value.channelId;
-                if (productChannel.effectiveDate) {
-                    productChannel.effectiveDate = DateTime.fromISO(productChannel.effectiveDate).toFormat("MM/dd/yyyy");
-                }
-                if (productChannel.endDate) {
-                    productChannel.endDate = DateTime.fromISO(productChannel.endDate).toFormat("MM/dd/yyyy");
-                }
-                if ((productChannel.gpoEnterpriseFee + "").toLowerCase() === "sliding scale") {
-                    productChannel.gpoEnterpriseFee = null;
-                    productChannel.isGpoEnterpriseFeeSlidingScale = true;
-                }
-                /*
-                contract.productChannels[i].gpoEnterpriseFee + "").toLowerCase() !== "sliding scale"*/
-
-                productChannel.ppas.forEach((ppa: any) => {
-                    if (ppa.effectiveDate) {
-                        ppa.effectiveDate = DateTime.fromISO(ppa.effectiveDate).toFormat("MM/dd/yyyy");
-                    }
-                    if (ppa.endDate) {
-                        ppa.endDate = DateTime.fromISO(ppa.endDate).toFormat("MM/dd/yyyy");
-                    }
-                    ppa["isPpCapCpi"] = (ppa.ppCap + "").toLowerCase() === "cpi";
-                    if (!ppa["isPpCapCpi"]) {
-                        delete ppa["threeYearAverage"];
-                    } else {
-                        ppa.ppCap = null;
-                    }
-                });
-
-                this.prefBrands.forEach((prefBrand) => {
-                    if (!productChannel.prefBrands[prefBrand.field].isChecked) {
-                        delete productChannel.prefBrands[prefBrand.field];
-                    }
-                });
-            });
-            contract.accountDirector.userName = contract.accountDirector.email = "n/a";
-            contract.accountDirectorId = contract.accountDirector.id;
-            (contract.clientId = contract.client.clientId), (contract.payorId = contract.payor.payorId);
+            const contract = this.formatContract(this.contract);
             this.contractsService
                 .save(contract)
                 .pipe(
                     tap((contractId) => {
-                        this.contract.contractId = contractId;
-                        this.contract.contractNotes = [...this.notes, ...this.contract.contractNotes];
+                        this.contracts[this.contractIndex] = {
+                            ...this.contract,
+                            contractId: contractId,
+                            contractNotes: [...this.notes, ...this.contract.contractNotes],
+                            productChannels: this.contract.productChannels.map((p) => ({ ...p, productId: p.value!.productId, channelId: p.value!.channelId })),
+                        };
                         this.notes = [];
-                        this.messageService.add({ severity: "success", summary: "Success", detail: `Contract ${contractId} saved.`, life: 3000 });
+                        this.selectContract(this.contractIndex);
+                        this.clearLocalStorage();
+                        this.messageService.add({ severity: "success", summary: "Success", detail: this.contractIndex ? `Amendment ${this.contractIndex} saved.` : `Contract ${contractId} saved.`, life: 3000 });
                     }),
                     catchError((err: any) => {
                         const messages = new Map<string, string>();
@@ -337,26 +430,41 @@ export class ContractComponent implements OnInit {
         }
     };
     delete = () => {
-        if (!!this.contract.contractId) {
+        if (!!this.contract.contractId || this.contractIndex > 0) {
             this.confirmationService.confirm({
                 header: "Are you sure?",
                 message: "Please confirm to proceed.",
                 accept: () => {
-                    this.contractsService
-                        .delete(this.contract.contractId)
-                        .pipe(
-                            tap(() => {
-                                this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000 });
-                            }),
-                            catchError((err) => {
-                                this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000 });
-                                return EMPTY;
-                            }),
-                            takeUntilDestroyed(this.destroyRef),
-                        )
-                        .subscribe();
+                    if (!!this.contract.contractId) {
+                        this.contractsService
+                            .delete(this.contract.contractId)
+                            .pipe(
+                                tap(() => {
+                                    this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000 });
+                                    if (this.contracts.length === 1) {
+                                        this.dialogRef?.close();
+                                    } else {
+                                        this.deleteContract();
+                                    }
+                                }),
+                                catchError((err) => {
+                                    this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000 });
+                                    return EMPTY;
+                                }),
+                                takeUntilDestroyed(this.destroyRef),
+                            )
+                            .subscribe();
+                    } else {
+                        this.deleteContract();
+                    }
                 },
             });
+        }
+    };
+    private deleteContract = () => {
+        if (this.contractIndex < this.contracts.length) {
+            this.contracts.splice(this.contractIndex, 1);
+            this.selectContract(this.contractIndex === this.contracts.length ? this.contractIndex - 1 : this.contractIndex);
         }
     };
 
@@ -394,9 +502,15 @@ export class ContractComponent implements OnInit {
 
     duplicate = (prefBrand: IPrefBrands, index: number): void => {
         if (index === 0) {
-            prefBrand["nonExclusion"] = JSON.parse(JSON.stringify(prefBrand["exclusion"]));
+            const json = utils.tryParseJSON<any>(JSON.stringify(prefBrand["exclusion"]));
+            if (json) {
+                prefBrand["nonExclusion"] = json;
+            }
         } else {
-            prefBrand["exclusion"] = JSON.parse(JSON.stringify(prefBrand["nonExclusion"]));
+            const json = utils.tryParseJSON<any>(JSON.stringify(prefBrand["nonExclusion"]));
+            if (json) {
+                prefBrand["exclusion"] = json;
+            }
         }
     };
 
@@ -438,10 +552,6 @@ export class ContractComponent implements OnInit {
     };
 
     isValid = (): boolean => {
-        if (this.isAmendment && this.contract!.title?.replace(/\s/g, "").length === 0) {
-            this.messageService.add({ severity: "error", summary: "Error", detail: "Please enter a title.", life: 3000 });
-            return false;
-        }
         if (!this.contract!.client?.clientId) {
             this.messageService.add({ severity: "error", summary: "Error", detail: "Please select a client.", life: 3000 });
             return false;
@@ -531,11 +641,8 @@ export class ContractComponent implements OnInit {
     };
 
     amend = (): void => {
-        this.contract.parentId = this.contract.contractId;
-        this.contract.contractId = 0;
-        this.contract.title = "";
-        this.isAmendment = true;
-        this.contract.loi = this.contract.contractNegotiationInitiated = this.contract.viking = this.contract.manufacturer = this.contract.payer = this.contract.contractExecuted = null;
+        this.contracts.push({ ...this.contract, parentId: this.contracts[0].contractId, contractId: 0, loi: null, contractNegotiationInitiated: null, viking: null, manufacturer: null, payer: null, contractExecuted: null });
+        this.selectContract(this.contracts.length - 1);
     };
     ngOnInit() {
         this.route.queryParams.subscribe((params) => {
@@ -579,6 +686,13 @@ export class ContractComponent implements OnInit {
             contract: this.contractId$.pipe(
                 distinctUntilChanged(),
                 switchMap((contractId: number) => {
+                    if (contractId < 0) {
+                        const contractsString = localStorage.getItem(LocalStorageKeyContract);
+                        if (!!contractsString) {
+                            const contracts: IContract[] = JSON.parse(contractsString);
+                            this.contract = { ...contracts[0], amendments: contracts.slice(1) };
+                        }
+                    }
                     return contractId > 0 ? this.contractsService.get(contractId) : of(this.contract);
                 }),
                 catchError((err: any) => {
@@ -595,64 +709,54 @@ export class ContractComponent implements OnInit {
         })
             .pipe(
                 tap(({ contract, clients, payors, accountManagers, currentAccountManager }) => {
+                    this.accountManagers = accountManagers;
                     this.clients = clients;
                     this.payors = payors;
                     if (contract.loi) {
-                        contract.loi = DateTime.fromFormat(contract.loi as string, "MM/dd/yyyy").toJSDate();
+                        contract.loi = contract.loi;
                     }
                     if (contract.contractNegotiationInitiated) {
-                        contract.contractNegotiationInitiated = DateTime.fromFormat(contract.contractNegotiationInitiated as string, "MM/dd/yyyy").toJSDate();
+                        contract.contractNegotiationInitiated = contract.contractNegotiationInitiated;
                     }
                     if (contract.viking) {
-                        contract.viking = DateTime.fromFormat(contract.viking as string, "MM/dd/yyyy").toJSDate();
+                        contract.viking = contract.viking;
                     }
                     if (contract.manufacturer) {
-                        contract.manufacturer = DateTime.fromFormat(contract.manufacturer as string, "MM/dd/yyyy").toJSDate();
+                        contract.manufacturer = contract.manufacturer;
                     }
                     if (contract.payer) {
-                        contract.payer = DateTime.fromFormat(contract.payer as string, "MM/dd/yyyy").toJSDate();
+                        contract.payer = contract.payer;
                     }
                     if (contract.contractExecuted) {
-                        contract.contractExecuted = DateTime.fromFormat(contract.contractExecuted as string, "MM/dd/yyyy").toJSDate();
+                        contract.contractExecuted = contract.contractExecuted;
                     }
-                    this.contract = contract;
-                    if (contract.client) {
-                        const client = clients.find((item) => item.clientId === contract.client!.clientId);
-                        if (client) {
-                            this.clientCtrl.setValue(client);
+                    if (contract.amendments.length) {
+                        this.contracts = [...contract.amendments];
+                        this.contracts.unshift({ ...contract, amendments: [] });
+                    } else {
+                        this.contracts = [{ ...contract }];
+                    }
+                    for (var i = 0; i < this.contracts.length; i++) {
+                        if (this.contracts[i]?.productChannels?.length) {
+                            this.prefBrands.forEach((prefBrand) => {
+                                this.contracts[i].productChannels.forEach((productChannel) => {
+                                    const isChecked = !!productChannel.prefBrands[prefBrand.field];
+                                    productChannel.prefBrands[prefBrand.field] = createProductChannelPrefBrand(productChannel.prefBrands[prefBrand.field]);
+                                    productChannel.prefBrands[prefBrand.field].isChecked = isChecked;
+                                });
+                            });
                         }
                     }
-                    if (contract.payor) {
-                        const payor = payors.find((item) => item.payorId === contract.payor!.payorId);
-                        if (payor) {
-                            this.payorCtrl.setValue(payor);
-                        }
-                    }
-                    this.accountManagers = accountManagers;
+
+                    this.selectContract(0);
+
                     if (currentAccountManager) {
                         const accountManager = accountManagers.find((item) => item.id === currentAccountManager.accountManagerId);
                         if (accountManager) {
                             this.accountManagerCtrl.setValue(accountManager);
                         }
                     }
-
-                    if (contract?.productChannels?.length) {
-                        this.prefBrands.forEach((prefBrand) => {
-                            contract.productChannels.forEach((productChannel) => {
-                                const isChecked = !!productChannel.prefBrands[prefBrand.field];
-                                productChannel.prefBrands[prefBrand.field] = createProductChannelPrefBrand(productChannel.prefBrands[prefBrand.field]);
-                                productChannel.prefBrands[prefBrand.field].isChecked = isChecked;
-                            });
-                        });
-                    }
-                    if (!!this.contract.client?.clientId) {
-                        if (this.contract.productChannels.length) {
-                            this.contract.productChannels.forEach((item) => {
-                                const pc = this.productChannels.find((elem) => elem.value.productId === item.productId && elem.value.channelId === item.channelId);
-                                item.value = pc?.value;
-                            });
-                        }
-                    }
+                    this.clearLocalStorage();
                 }),
                 tap((_) => {
                     if (this.contract.contractId && this.isPrinting) {

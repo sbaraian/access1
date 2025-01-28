@@ -13,7 +13,7 @@ export const utils = {
     getValue(row: any, field: string): any {
         const fields = field.split(".");
         let val = row;
-        for (var i = 0; i < fields.length; i++) {
+        for (var i = 0; val && i < fields.length; i++) {
             val = val[fields[i]];
         }
         return val;

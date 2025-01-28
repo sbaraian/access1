@@ -46,7 +46,7 @@ export class PayorContactComponent {
                     this.ref.close(this.contact);
                 }),
                 catchError((err) => {
-                    this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "payorContact" });
+                    this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000, key: "payorContact" });
                     return EMPTY;
                 }),
                 takeUntilDestroyed(this.destroyRef),

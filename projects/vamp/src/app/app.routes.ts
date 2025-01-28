@@ -9,6 +9,7 @@ import { ContractsComponent } from "./contracts/contracts.component";
 import { PayorViewComponent } from "./payor-view/payor-view.component";
 import { PayorComponent } from "./payor/payor.component";
 import { PayorsComponent } from "./payor/payors.component";
+import { VikingUsersComponent } from "./viking-users/viking-users.component";
 
 export const routes: Routes = [
     { path: "analytics", component: AnalyticsComponent, canActivate: [AuthGuard] },
@@ -19,5 +20,7 @@ export const routes: Routes = [
     { path: "payors", component: PayorsComponent, canActivate: [AuthGuard] },
     { path: "clients/:id", component: ClientComponent, canActivate: [AuthGuard] },
     { path: "clients", component: ClientsComponent, canActivate: [AuthGuard] },
+    { path: "viking-users", component: VikingUsersComponent, canActivate: [AuthGuard], data: { isClientUser: false } },
+    { path: "client-users", component: VikingUsersComponent, canActivate: [AuthGuard], data: { isClientUser: true } },
     { path: "**", component: EmptyComponent },
 ];

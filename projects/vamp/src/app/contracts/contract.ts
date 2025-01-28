@@ -20,6 +20,8 @@ export interface IContract {
     status: string | null;
     productChannels: IProductChannel[];
     contractNotes: IContractNote[];
+    amendments: IContract[];
+    hasAmendments: string;
 }
 export interface IContractNote {
     contractNoteId: number | null;
@@ -98,6 +100,8 @@ export function createContract(args?: any) {
         status: null,
         productChannels: [],
         contractNotes: [],
+        amendments: [],
+        hasAmendments: "No",
     };
     if (args) {
         Object.assign(target, args);

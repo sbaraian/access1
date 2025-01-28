@@ -1,0 +1,85 @@
+<div class="p-2">
+    <div>
+        <p-card>
+            <div class="flex flex-column flex-wrap gap-4">
+                <div class="flex flex-wrap gap-2">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <input type="text" id="name" pInputText [(ngModel)]="user.name" required />
+                            <label for="name">Name</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <input type="text" id="userName" pInputText [(ngModel)]="user.userName" required />
+                            <label for="userName">User Name</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <input type="text" id="email" pInputText [(ngModel)]="user.email" required />
+                            <label for="email">Email</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2" *ngIf="isClientUser">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <p-dropdown inputId="client" [options]="clients" optionLabel="name" optionValue="clientId" [style]="{ 'min-width': '200px' }" [(ngModel)]="user.clientId" />
+                            <label for="client">Client</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <p-dropdown inputId="manager" [options]="accountManagers" optionLabel="name" optionValue="id" [style]="{ 'min-width': '200px' }" [(ngModel)]="user.accountManagerId" />
+                            <label for="manager">Manager</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div>
+                    <p-checkbox [binary]="true" inputId="isActive" class="w-full" [(ngModel)]="user.isActive" label="Active" />
+                </div>
+                <div>
+                    <p-checkbox [binary]="true" inputId="hasMultipleAccountManagers" class="w-full" [(ngModel)]="user.hasMultipleAccountManagers" label="Has Multiple Account Managers" />
+                </div>
+                <div class="flex flex-column flex-wrap gap-2">
+                    <div><label for="email">Roles</label></div>
+                    <div class="flex justify-content-between flex-wrap gap-2">
+                        <div *ngFor="let role of roles">
+                            <p-checkbox [binary]="true" class="w-full" [(ngModel)]="role.checked" [label]="role.name" />
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="user.id">
+                    <p-checkbox [binary]="true" inputId="resetPassword" class="w-full" [(ngModel)]="user.resetPassword" label="Reset Password" />
+                </div>
+                <div class="flex flex-wrap gap-2" *ngIf="user.resetPassword || !user.id">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <p-password [(ngModel)]="user.password" [toggleMask]="true" />
+                            <label for="password">Password</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2" *ngIf="user.resetPassword || !user.id">
+                    <div class="mt-4">
+                        <p-floatLabel>
+                            <p-password [(ngModel)]="user.confirmPassword" [toggleMask]="true" />
+                            <label for="confirmPassword">Confirm Password</label>
+                        </p-floatLabel>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+    </div>
+    <p-divider />
+    <div class="text-right">
+        <p-button icon="pi pi-save" label="Save" [outlined]="true" severity="primary" (click)="save()" />
+    </div>
+</div>

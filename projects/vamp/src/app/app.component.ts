@@ -174,6 +174,16 @@ export class AppComponent implements OnInit {
                         label: "Clients",
                         route: "/clients",
                     },
+                    {
+                        icon: "pi pi-users",
+                        label: "Viking Users",
+                        route: "/viking-users",
+                    },
+                    {
+                        icon: "pi pi-address-book",
+                        label: "Client Users",
+                        route: "/client-users",
+                    },
                 ],
             },
         ];

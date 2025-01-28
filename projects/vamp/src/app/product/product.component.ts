@@ -116,7 +116,7 @@ export class ProductComponent implements OnInit {
                             this.product.productDetails = [...this.product.productDetails];
                         }),
                         catchError((err) => {
-                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "product" });
+                            this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000, key: "product" });
                             return EMPTY;
                         }),
                         takeUntilDestroyed(this.destroyRef),
@@ -140,7 +140,7 @@ export class ProductComponent implements OnInit {
                             this.product.therapeuticCategoryId = 0;
                         }),
                         catchError((err) => {
-                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "product" });
+                            this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000, key: "product" });
                             return EMPTY;
                         }),
                         takeUntilDestroyed(this.destroyRef),

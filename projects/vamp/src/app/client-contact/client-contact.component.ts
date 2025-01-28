@@ -46,7 +46,7 @@ export class ClientContactComponent {
                     this.ref.close(this.contact);
                 }),
                 catchError((err) => {
-                    this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "clientContact" });
+                    this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000, key: "clientContact" });
                     return EMPTY;
                 }),
                 takeUntilDestroyed(this.destroyRef),

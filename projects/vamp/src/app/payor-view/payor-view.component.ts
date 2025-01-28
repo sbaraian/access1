@@ -405,7 +405,7 @@ export class PayorViewComponent implements OnInit {
                             this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000 });
                         }),
                         catchError((err) => {
-                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000 });
+                            this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000 });
                             return EMPTY;
                         }),
                         takeUntilDestroyed(this.destroyRef),
@@ -427,7 +427,7 @@ export class PayorViewComponent implements OnInit {
                         this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000 });
                     }),
                     catchError((err) => {
-                        this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000 });
+                        this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000 });
                         return EMPTY;
                     }),
                     takeUntilDestroyed(this.destroyRef),

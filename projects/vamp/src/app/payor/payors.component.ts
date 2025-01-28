@@ -68,7 +68,7 @@ export class PayorsComponent implements OnInit {
                             this.messageService.add({ severity: "success", summary: "Success", detail: "Successful delete", life: 3000, key: "payors" });
                         }),
                         catchError((err) => {
-                            this.messageService.add({ severity: "error", summary: "Error", detail: err.statusText, life: 3000, key: "payors" });
+                            this.messageService.add({ severity: "error", summary: "Error", detail: err?.error?.message ?? err.statusText, life: 3000, key: "payors" });
                             return EMPTY;
                         }),
                         takeUntilDestroyed(this.destroyRef),

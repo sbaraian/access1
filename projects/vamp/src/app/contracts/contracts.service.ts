@@ -15,7 +15,7 @@ export class ContractsService {
     public static contractId: number = 0;
 
     getData = (clientId: number, productId: number, payorId: number, channelId: number, therapeuticCategoryId: number, accountDirectorId: string, contractStatusId: number, renewal: number, activeStatusId: number, year: number): Observable<IContract[]> => {
-        const url = `api/contracts/getData?clientId=${clientId}&productId=${productId}&payorId=${channelId}&channelId=${clientId}&therapeuticCategoryId=${therapeuticCategoryId}&accountDirectorId=${accountDirectorId}&contractStatusId=${contractStatusId}&renewal=${renewal}&activeStatusId=${activeStatusId}&year=${year}`;
+        const url = `api/contracts/getData?clientId=${clientId}&productId=${productId}&payorId=${payorId}&channelId=${channelId}&therapeuticCategoryId=${therapeuticCategoryId}&accountDirectorId=${accountDirectorId}&contractStatusId=${contractStatusId}&renewal=${renewal}&activeStatusId=${activeStatusId}${year ? "&year=" + year : ""}`;
         return this.http.get<IContract[]>(url);
     };
 

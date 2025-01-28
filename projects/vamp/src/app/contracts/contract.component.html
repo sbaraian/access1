@@ -1,6 +1,15 @@
 <div class="no-print" *ngIf="!isPrinting">
     <p-toast position="bottom-right" />
     <div>
+        <div *ngIf="contracts.length > 1">
+            <p-toolbar>
+                <div class="p-toolbar-group-start">
+                    <div class="flex gap-1">
+                        <p-button *ngFor="let c of contracts; let idx = index" (click)="selectContract(idx)" [label]="idx ? 'Amendment ' + idx : 'Original'" [severity]="idx === contractIndex ? 'primary' : 'secondary'" />
+                    </div>
+                </div>
+            </p-toolbar>
+        </div>
         <div>
             <p-panel [toggleable]="true" styleClass="primary-header">
                 <ng-template pTemplate="header">
@@ -11,13 +20,13 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                         <div class="circle-container" style="flex-grow: 3; gap: 0">
@@ -31,19 +40,19 @@
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #59b485">Viking</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00bbdd">Payer</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                             </div>
@@ -51,7 +60,7 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                     </div>
@@ -67,9 +76,9 @@
                                     <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="generatePDF1()" label="1" />
                                     <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="generatePDF2()" label="2" />
                                     <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" label="3" />
-                                    <p-button icon="pi pi-pen-to-square" severity="secondary" title="Amend" (click)="amend()" *ngIf="contract.contractId > 0 && contract.contractExecuted" />
+                                    <p-button icon="pi pi-pen-to-square" severity="secondary" title="Amend" (click)="amend()" *ngIf="contract.contractId > 0 && contract.contractExecuted && !contract.parentId" />
                                     <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" *ngIf="!isInvalid" />
-                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
+                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="(!!contract?.contractId && contracts.length === 1) || contractIndex > 0" />
                                 </p-buttonGroup>
                             </div>
                         </div>
@@ -82,7 +91,7 @@
                                 <p-buttonGroup>
                                     <p-button icon="pi pi-print" severity="secondary" title="Print" (click)="print()" />
                                     <p-button icon="pi pi-save" severity="secondary" title="Save" (click)="save()" />
-                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="!!contract?.contractId" />
+                                    <p-button icon="pi pi-trash" severity="secondary" title="Delete" (click)="delete()" *ngIf="(!!contract?.contractId && contracts.length === 1) || contractIndex > 0" />
                                 </p-buttonGroup>
                             </div>
                         </div>
@@ -110,15 +119,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-2" *ngIf="isAmendment">
-                    <p-floatLabel>
-                        <input inputId="title" pInputText [(ngModel)]="contract.title" class="w-full mt-1" />
-                        <label for="title">Title</label>
-                    </p-floatLabel>
-                </div>
                 <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
                     <label>Comments/Notes</label>
-                    <p-editor [(ngModel)]="contract.notes" [style]="{ height: '100px' }" />
+                    <p-editor (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.notes" [style]="{ height: '100px' }" />
                 </div>
                 <p-panel styleClass="secondary-header" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)" [toggleable]="true">
                     <ng-template pTemplate="header">
@@ -145,7 +148,7 @@
                                                         <label for="isCompleted">Completed</label>
                                                     </div>
                                                     <div>
-                                                        <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                                        <p-triStateCheckbox inputId="isCompleted" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.isComplete" />
                                                     </div>
                                                 </div>
                                                 <div class="text-right">
@@ -157,6 +160,7 @@
                                                     appendTo="body"
                                                     placeholder="Product and Channel"
                                                     inputId="productChannelCtrl"
+                                                    (ngModelChange)="onFormChange($event)"
                                                     [(ngModel)]="productChannel.value"
                                                     [options]="productChannel.options"
                                                     optionLabel="name"
@@ -181,7 +185,7 @@
                                             <label for="float-input">Effective Date</label>
                                         </div>
                                         <div>
-                                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
+                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
                                         </div>
                                     </div>
                                     <div class="flex flex-column gap-2 text-center">
@@ -189,7 +193,7 @@
                                             <label for="endDate">End Date</label>
                                         </div>
                                         <div>
-                                            <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" />
                                         </div>
                                     </div>
                                     <div class="flex flex-column gap-2 text-center">
@@ -205,13 +209,13 @@
                                             <label for="autoRenew">Auto-Renew</label>
                                         </div>
                                         <div>
-                                            <p-triStateCheckbox inputId="autoRenew" [(ngModel)]="productChannel.autoRenew" />
+                                            <p-triStateCheckbox inputId="autoRenew" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.autoRenew" />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4">
                                     <p-floatLabel>
-                                        <textarea [(ngModel)]="productChannel.description" id="description" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                        <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.description" id="description" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                         <label for="description">Description</label>
                                     </p-floatLabel>
                                 </div>
@@ -231,7 +235,7 @@
                                             <p-inputGroupAddon>
                                                 <i class="pi pi-percentage"></i>
                                             </p-inputGroupAddon>
-                                            <input inputId="adminFee" pInputText [(ngModel)]="productChannel.adminFee" />
+                                            <input inputId="adminFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.adminFee" />
                                         </p-inputGroup>
                                     </div>
                                     <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -242,7 +246,7 @@
                                             <p-inputGroupAddon>
                                                 <i class="pi pi-percentage"></i>
                                             </p-inputGroupAddon>
-                                            <input inputId="dataPortalFee" pInputText [(ngModel)]="productChannel.dataPortalFee" />
+                                            <input inputId="dataPortalFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.dataPortalFee" />
                                         </p-inputGroup>
                                     </div>
                                     <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -253,7 +257,7 @@
                                             <p-inputGroupAddon>
                                                 <i class="pi pi-percentage"></i>
                                             </p-inputGroupAddon>
-                                            <input inputId="gpoEnterpriseFee" pInputText [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
+                                            <input inputId="gpoEnterpriseFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
                                         </p-inputGroup>
                                     </div>
                                     <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -264,18 +268,18 @@
                                             <p-inputGroupAddon>
                                                 <i class="pi pi-percentage"></i>
                                             </p-inputGroupAddon>
-                                            <input inputId="otherFee" pInputText [(ngModel)]="productChannel.otherFee" />
+                                            <input inputId="otherFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.otherFee" />
                                         </p-inputGroup>
                                     </div>
                                     <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                         <div>
                                             <label for="otherFeeDescription">Other Fee Description</label>
                                         </div>
-                                        <input pInputText id="otherFeeDescription" [(ngModel)]="productChannel.otherFeeDescription" />
+                                        <input pInputText id="otherFeeDescription" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.otherFeeDescription" />
                                     </div>
                                     <div *ngIf="($any(productChannel.gpoEnterpriseFee) + '')?.toLowerCase() === 'sliding scale'" class="flex col-offset-5 col-5 flex-column text-center p-2 mt-4">
                                         <p-floatLabel>
-                                            <textarea [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                            <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                             <label for="gpoEnterpriseFeeSlidingScale">Sliding Scale Description</label>
                                         </p-floatLabel>
                                     </div>
@@ -294,7 +298,7 @@
                                             <div class="flex flex-column gap-2 text-center">
                                                 <div style="white-space: nowrap">{{ prefBrand.title }}</div>
                                                 <div>
-                                                    <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
+                                                    <p-checkbox (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
                                                 </div>
                                             </div>
                                             <div class="flex flex-column gap-2 text-center">
@@ -302,7 +306,7 @@
                                                     <label for="isCompleted">Complete</label>
                                                 </div>
                                                 <div>
-                                                    <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
+                                                    <p-triStateCheckbox inputId="isCompleted" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
                                                 </div>
                                             </div>
                                         </div>
@@ -328,7 +332,7 @@
                                 <div class="flex-column p-4 border-solid border-1 border-top-none" *ngIf="prefBrandIndex >= 0 && productChannel.prefBrands[prefBrands[prefBrandIndex].field]">
                                     <div class="w-full">
                                         <p-floatLabel>
-                                            <textarea [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                            <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                             <label for="exclusionComments">Exclusion / Non-Excl. Notes</label>
                                         </p-floatLabel>
                                     </div>
@@ -364,26 +368,26 @@
                                             <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
                                                 <tr>
                                                     <td>
-                                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
                                                     </td>
                                                     <td>
-                                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
                                                     </td>
                                                     <td>
                                                         <p-inputGroup>
                                                             <p-inputGroupAddon>
                                                                 <i class="pi pi-percentage"></i>
                                                             </p-inputGroupAddon>
-                                                            <input pInputText [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
+                                                            <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
                                                         </p-inputGroup>
                                                     </td>
-                                                    <td><input pInputText [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
+                                                    <td><input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
                                                     <td>
                                                         <p-inputGroup>
                                                             <p-inputGroupAddon>
                                                                 <i class="pi pi-percentage"></i>
                                                             </p-inputGroupAddon>
-                                                            <input pInputText [(ngModel)]="ppa.shareBellowCap" />
+                                                            <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.shareBellowCap" />
                                                         </p-inputGroup>
                                                     </td>
                                                     <td>
@@ -391,7 +395,7 @@
                                                             <p-inputGroupAddon>
                                                                 <i class="pi pi-percentage"></i>
                                                             </p-inputGroupAddon>
-                                                            <input pInputText [(ngModel)]="ppa.shareAboveCap" />
+                                                            <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.shareAboveCap" />
                                                         </p-inputGroup>
                                                     </td>
                                                     <td><button type="button" pButton pRipple icon="pi pi-trash" (click)="deletePpa(productChannel, ri)" severity="danger"></button></td>
@@ -399,7 +403,7 @@
                                                 <tr *ngIf="($any(ppa.ppCap) + '')?.toLowerCase() === 'cpi'">
                                                     <td colspan="8">
                                                         <p-floatLabel>
-                                                            <textarea [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                            <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                                             <label for="threeYearAverageMedicalCpi">3 Year Average Medical CPI</label>
                                                         </p-floatLabel>
                                                     </td>
@@ -430,19 +434,19 @@
     <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
         <div class="col-3 mt-1">
             <p-floatLabel>
-                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
+                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
                 <label for="reviewDate">Review Date</label>
             </p-floatLabel>
         </div>
         <div class="col-3 mt-1">
             <p-floatLabel>
-                <p-dropdown inputId="inReviewEntity" [(ngModel)]="note.inReviewEntity" [options]="inReviewEntities" appendTo="body" [disabled]="!data.showDelete" />
+                <p-dropdown inputId="inReviewEntity" (ngModelChange)="onFormChange($event)" [(ngModel)]="note.inReviewEntity" [options]="inReviewEntities" appendTo="body" [disabled]="!data.showDelete" />
                 <label for="inReviewEntity">In Review Entity</label>
             </p-floatLabel>
         </div>
         <div class="col-6 mt-1" [class.col-6]="!data.showDelete" [class.col-5]="data.showDelete">
             <p-floatLabel>
-                <textarea [(ngModel)]="note.note" id="note" rows="3" cols="30" pInputTextarea class="w-full" [disabled]="!data.showDelete"> </textarea>
+                <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="note.note" id="note" rows="3" cols="30" pInputTextarea class="w-full" [disabled]="!data.showDelete"> </textarea>
                 <label for="note">Comments/note</label>
             </p-floatLabel>
         </div>
@@ -463,17 +467,17 @@
         <ng-template pTemplate="body" let-rebate let-ri="rowIndex">
             <tr>
                 <td>
-                    <p-dropdown appendTo="body" inputId="rebate" [(ngModel)]="rebate.rebate" [options]="['1:1', '1:2', '1:3', '1:4', '1:5', '1:Many', 'Listed']" styleClass="w-full" />
+                    <p-dropdown appendTo="body" inputId="rebate" (ngModelChange)="onFormChange($event)" [(ngModel)]="rebate.rebate" [options]="['1:1', '1:2', '1:3', '1:4', '1:5', '1:Many', 'Listed']" styleClass="w-full" />
                 </td>
                 <td>
                     <p-inputGroup>
                         <p-inputGroupAddon>
                             <i class="pi pi-percentage"></i>
                         </p-inputGroupAddon>
-                        <input pInputText [(ngModel)]="rebate.rebatePercentage" />
+                        <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="rebate.rebatePercentage" />
                     </p-inputGroup>
                 </td>
-                <td><input pInputText [(ngModel)]="rebate.description" class="w-full" /></td>
+                <td><input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="rebate.description" class="w-full" /></td>
                 <td><p-button icon="pi pi-trash" (click)="deleteRebate(exclusion, ri)" severity="danger" styleClass="no-print" /></td>
             </tr>
         </ng-template>
@@ -492,13 +496,13 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                         <div class="circle-container" style="flex-grow: 3; gap: 0">
@@ -512,19 +516,19 @@
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #59b485">Viking</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00bbdd">Payer</div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
                                     </div>
                                 </div>
                             </div>
@@ -532,7 +536,7 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
                             <div>
-                                <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
                             </div>
                         </div>
                     </div>
@@ -566,15 +570,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-2" *ngIf="isAmendment">
-                    <p-floatLabel>
-                        <input inputId="title" pInputText [(ngModel)]="contract.title" class="w-full mt-1" />
-                        <label for="title">Title</label>
-                    </p-floatLabel>
-                </div>
                 <div class="mt-2" *ngIf="!!contract?.contractId || (contract.client?.clientId && contract.payor?.payorId && contract.accountDirector?.id)">
                     <p-floatLabel>
-                        <textarea [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                        <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.notes" id="comments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                         <label for="comments">Comments/Notes</label>
                     </p-floatLabel>
                 </div>
@@ -594,7 +592,7 @@
                                                 <label for="isCompleted">Completed</label>
                                             </div>
                                             <div>
-                                                <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.isComplete" />
+                                                <p-triStateCheckbox inputId="isCompleted" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.isComplete" />
                                             </div>
                                         </div>
                                     </div>
@@ -603,6 +601,7 @@
                                             appendTo="body"
                                             placeholder="Product and Channel"
                                             inputId="productChannelCtrl"
+                                            (ngModelChange)="onFormChange($event)"
                                             [(ngModel)]="productChannel.value"
                                             [options]="productChannel.options"
                                             optionLabel="name"
@@ -626,7 +625,7 @@
                                         <label for="float-input">Effective Date</label>
                                     </div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
                                     </div>
                                 </div>
                                 <div class="flex flex-column gap-2 text-center">
@@ -634,7 +633,7 @@
                                         <label for="endDate">End Date</label>
                                     </div>
                                     <div>
-                                        <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" />
                                     </div>
                                 </div>
                                 <div class="flex flex-column gap-2 text-center">
@@ -650,13 +649,13 @@
                                         <label for="autoRenew">Auto-Renew</label>
                                     </div>
                                     <div>
-                                        <p-triStateCheckbox inputId="autoRenew" [(ngModel)]="productChannel.autoRenew" />
+                                        <p-triStateCheckbox inputId="autoRenew" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.autoRenew" />
                                     </div>
                                 </div>
                             </div>
                             <div class="mt-4">
                                 <p-floatLabel>
-                                    <textarea [(ngModel)]="productChannel.description" id="description" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                    <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.description" id="description" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                     <label for="description">Description</label>
                                 </p-floatLabel>
                             </div>
@@ -676,7 +675,7 @@
                                         <p-inputGroupAddon>
                                             <i class="pi pi-percentage"></i>
                                         </p-inputGroupAddon>
-                                        <input inputId="adminFee" pInputText [(ngModel)]="productChannel.adminFee" />
+                                        <input inputId="adminFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.adminFee" />
                                     </p-inputGroup>
                                 </div>
                                 <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -687,7 +686,7 @@
                                         <p-inputGroupAddon>
                                             <i class="pi pi-percentage"></i>
                                         </p-inputGroupAddon>
-                                        <input inputId="dataPortalFee" pInputText [(ngModel)]="productChannel.dataPortalFee" />
+                                        <input inputId="dataPortalFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.dataPortalFee" />
                                     </p-inputGroup>
                                 </div>
                                 <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -698,7 +697,7 @@
                                         <p-inputGroupAddon>
                                             <i class="pi pi-percentage"></i>
                                         </p-inputGroupAddon>
-                                        <input inputId="gpoEnterpriseFee" pInputText [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
+                                        <input inputId="gpoEnterpriseFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.gpoEnterpriseFee" placeholder="number or sliding scale" />
                                     </p-inputGroup>
                                 </div>
                                 <div class="flex col-2 flex-column text-center p-2 justify-content-between">
@@ -709,18 +708,18 @@
                                         <p-inputGroupAddon>
                                             <i class="pi pi-percentage"></i>
                                         </p-inputGroupAddon>
-                                        <input inputId="otherFee" pInputText [(ngModel)]="productChannel.otherFee" />
+                                        <input inputId="otherFee" pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.otherFee" />
                                     </p-inputGroup>
                                 </div>
                                 <div class="flex col-2 flex-column text-center p-2 justify-content-between">
                                     <div>
                                         <label for="otherFeeDescription">Other Fee Description</label>
                                     </div>
-                                    <input pInputText id="otherFeeDescription" [(ngModel)]="productChannel.otherFeeDescription" />
+                                    <input pInputText id="otherFeeDescription" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.otherFeeDescription" />
                                 </div>
                                 <div *ngIf="($any(productChannel.gpoEnterpriseFee) + '')?.toLowerCase() === 'sliding scale'" class="flex col-offset-5 col-5 flex-column text-center p-2 mt-4">
                                     <p-floatLabel>
-                                        <textarea [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                        <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.gpoEnterpriseFeeSlidingScale" id="gpoEnterpriseFeeSlidingScale" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                         <label for="gpoEnterpriseFeeSlidingScale">Sliding Scale Description</label>
                                     </p-floatLabel>
                                 </div>
@@ -741,7 +740,7 @@
                                                 <div class="flex flex-column gap-2 text-center">
                                                     <div style="white-space: nowrap">{{ prefBrand.title }}</div>
                                                     <div>
-                                                        <p-checkbox [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
+                                                        <p-checkbox (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isChecked" [binary]="true" />
                                                     </div>
                                                 </div>
                                                 <div class="flex flex-column gap-2 text-center">
@@ -749,7 +748,7 @@
                                                         <label for="isCompleted">Complete</label>
                                                     </div>
                                                     <div>
-                                                        <p-triStateCheckbox inputId="isCompleted" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
+                                                        <p-triStateCheckbox inputId="isCompleted" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrand.field]!.isCompleted" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -767,7 +766,7 @@
                                             <div class="flex-column p-4 border-solid border-1" *ngIf="prefBrandIndex >= 0 && productChannel.prefBrands[prefBrands[prefBrandIndex].field]">
                                                 <div class="w-full">
                                                     <p-floatLabel>
-                                                        <textarea [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                        <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.prefBrands[prefBrands[prefBrandIndex].field]!.exclusionNonExclusionNotes" id="exclusionComments" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                                         <label for="exclusionComments">Exclusion / Non-Excl. Notes</label>
                                                     </p-floatLabel>
                                                 </div>
@@ -806,26 +805,26 @@
                                         <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
                                             <tr>
                                                 <td>
-                                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
                                                 </td>
                                                 <td>
-                                                    <p-calendar placeholder="mm/dd/yyyy" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
                                                 </td>
                                                 <td>
                                                     <p-inputGroup>
                                                         <p-inputGroupAddon>
                                                             <i class="pi pi-percentage"></i>
                                                         </p-inputGroupAddon>
-                                                        <input pInputText [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
+                                                        <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.ppCap" placeholder="number or CPI" />
                                                     </p-inputGroup>
                                                 </td>
-                                                <td><input pInputText [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
+                                                <td><input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.ppCapDescription" class="w-full" /></td>
                                                 <td>
                                                     <p-inputGroup>
                                                         <p-inputGroupAddon>
                                                             <i class="pi pi-percentage"></i>
                                                         </p-inputGroupAddon>
-                                                        <input pInputText [(ngModel)]="ppa.shareBellowCap" />
+                                                        <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.shareBellowCap" />
                                                     </p-inputGroup>
                                                 </td>
                                                 <td>
@@ -833,14 +832,14 @@
                                                         <p-inputGroupAddon>
                                                             <i class="pi pi-percentage"></i>
                                                         </p-inputGroupAddon>
-                                                        <input pInputText [(ngModel)]="ppa.shareAboveCap" />
+                                                        <input pInputText (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.shareAboveCap" />
                                                     </p-inputGroup>
                                                 </td>
                                             </tr>
                                             <tr *ngIf="($any(ppa.ppCap) + '')?.toLowerCase() === 'cpi'">
                                                 <td colspan="8">
                                                     <p-floatLabel>
-                                                        <textarea [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
+                                                        <textarea (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.threeYearAverageMedicalCpi" id="threeYearAverageMedicalCpi" rows="3" cols="30" pInputTextarea class="w-full mt-1"> </textarea>
                                                         <label for="threeYearAverageMedicalCpi">3 Year Average Medical CPI</label>
                                                     </p-floatLabel>
                                                 </td>
