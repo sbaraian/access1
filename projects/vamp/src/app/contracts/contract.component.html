@@ -18,15 +18,15 @@
                 <p-card *ngIf="!!contract.contractId">
                     <div class="flex justify-content-around w-full">
                         <div class="circle-container pb-1">
-                            <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
+                            <div class="circle" style="background-color: #75cfe5">LOI/Bid</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                         <div class="circle-container pb-1">
-                            <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
+                            <div class="circle" style="background-color: #dad6d2">Contract Negotiation Initiated</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                         <div class="circle-container" style="flex-grow: 3; gap: 0">
@@ -38,29 +38,29 @@
                             </div>
                             <div class="flex justify-content-around w-full border-solid border-1 border-gray-500 p-1">
                                 <div class="circle-container">
-                                    <div class="circle" style="background-color: #59b485">Viking</div>
+                                    <div class="circle" style="background-color: #f2894e">Viking</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
-                                    <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
+                                    <div class="circle" style="background-color: #e9671f; color: white">Manufacturer</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
-                                    <div class="circle" style="background-color: #00bbdd">Payer</div>
+                                    <div class="circle" style="background-color: #6c2922; color: white">Payer</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="circle-container pb-1">
-                            <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
+                            <div class="circle" style="background-color: #00718c; color: white">Contract Executed</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                     </div>
@@ -185,7 +185,7 @@
                                             <label for="float-input">Effective Date</label>
                                         </div>
                                         <div>
-                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
+                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" [style]="{ 'text-align': 'center' }" />
                                         </div>
                                     </div>
                                     <div class="flex flex-column gap-2 text-center">
@@ -193,7 +193,7 @@
                                             <label for="endDate">End Date</label>
                                         </div>
                                         <div>
-                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                            <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" [style]="{ 'text-align': 'center' }" />
                                         </div>
                                     </div>
                                     <div class="flex flex-column gap-2 text-center">
@@ -368,10 +368,10 @@
                                             <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
                                                 <tr>
                                                     <td>
-                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" [style]="{ 'text-align': 'center' }" />
                                                     </td>
                                                     <td>
-                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" [style]="{ 'text-align': 'center' }" />
                                                     </td>
                                                     <td>
                                                         <p-inputGroup>
@@ -434,7 +434,7 @@
     <div class="grid p-3" *ngFor="let note of data.notes; let idx = index">
         <div class="col-3 mt-1">
             <p-floatLabel>
-                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" />
+                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="note.reviewDate" inputId="reviewDate" [disabled]="!data.showDelete" [style]="{ 'text-align': 'center' }" />
                 <label for="reviewDate">Review Date</label>
             </p-floatLabel>
         </div>
@@ -496,13 +496,13 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #f0eb6b">LOI/Bid</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.loi" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #bfd857">Contract Negotiation Initiated</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractNegotiationInitiated" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                         <div class="circle-container" style="flex-grow: 3; gap: 0">
@@ -516,19 +516,19 @@
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #59b485">Viking</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.viking" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00b7a3">Manufacturer</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.manufacturer" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="circle-container">
                                     <div class="circle" style="background-color: #00bbdd">Payer</div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px' }" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.payer" [style]="{ width: '150px', 'text-align': 'center' }" />
                                     </div>
                                 </div>
                             </div>
@@ -536,7 +536,7 @@
                         <div class="circle-container pb-1">
                             <div class="circle" style="background-color: #94a5cb">Contract Executed</div>
                             <div>
-                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px' }" />
+                                <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="contract.contractExecuted" [style]="{ width: '150px', 'text-align': 'center' }" />
                             </div>
                         </div>
                     </div>
@@ -625,7 +625,7 @@
                                         <label for="float-input">Effective Date</label>
                                     </div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.effectiveDate" inputId="effectiveDate" [style]="{ 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="flex flex-column gap-2 text-center">
@@ -633,7 +633,7 @@
                                         <label for="endDate">End Date</label>
                                     </div>
                                     <div>
-                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" />
+                                        <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="productChannel.endDate" inputId="endDate" [style]="{ 'text-align': 'center' }" />
                                     </div>
                                 </div>
                                 <div class="flex flex-column gap-2 text-center">
@@ -805,10 +805,10 @@
                                         <ng-template pTemplate="body" let-ppa let-ri="rowIndex">
                                             <tr>
                                                 <td>
-                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" />
+                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.effectiveDate" inputId="ppa.effectiveDate" [style]="{ 'text-align': 'center' }" />
                                                 </td>
                                                 <td>
-                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" />
+                                                    <p-inputMask mask="99/99/9999" slotChar="mm/dd/yyyy" placeholder="mm/dd/yyyy" (ngModelChange)="onFormChange($event)" [(ngModel)]="ppa.endDate" inputId="ppa.endDate" [style]="{ 'text-align': 'center' }" />
                                                 </td>
                                                 <td>
                                                     <p-inputGroup>
